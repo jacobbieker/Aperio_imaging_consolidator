@@ -101,11 +101,12 @@ files <- list.files(getwd(), pattern = ".xls");
 
 #   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
 
-#   create data.frame for output
-output <- data.frame();
+#   create list to hold output data.frames
+output <- list()
 #   create vector for storing the different stain numbers so that diff sheets created
 stain.numbers <- c();
-#   create 
+#   create workbook to save the data to
+workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -135,6 +136,8 @@ for(i in 1:length(files))   {
     #Adds stain number to stain.numbers if it does not already exist in the vector
     if(!stain.number %in% stain.numbers) {
       stain.numbers <- c(stain.numbers, stain.number)
+      #  Create a sheet in the master workbook for each stain
+      createSheet(workbook, name = "Stain " + as.character(stain.number))
     }
     
     #   prepend metadata to file content
@@ -160,12 +163,7 @@ for(i in 1:length(colnames(output)))
 
 #Works for now, but not for each stain, since each has to be on its own sheet
 #write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
-workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
-#  Create a sheet in the master workbook for each stain
-for( i in 1:length(stain.numbers)) {
-  createSheet(workbook, name = "Stain " + as.character(stain.numbers[i]))
-}
 
 
 
