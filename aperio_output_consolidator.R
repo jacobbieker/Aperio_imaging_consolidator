@@ -18,7 +18,7 @@
 #             mouse_3_slide_2_stain_5.xls
 #
 #       Note that the delimitator between each component of the file name can be 
-#       any of the following: ",", " ", or "_"
+#       any of the following: "_"
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -27,13 +27,12 @@
 #-------------------------------------------------------------------------
 #   load appropriate libraries
 library(readxl);
-library(xlsx);
+library(XLConnect);
 #library(yaml);
 
 #   TODO:  move this to config file
 predefined.column.headers <- c("Mouse ID",
                     "Slide Number",
-                    "Stain Number",
                     "Region",
                     "Length (um)",
                     "Area (um2)",
@@ -104,6 +103,9 @@ files <- list.files(getwd(), pattern = ".xls");
 
 #   create data.frame for output
 output <- data.frame();
+#   create vector for storing the different stain numbers so that diff sheets created
+stain.numbers <- c();
+#   create 
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -126,12 +128,17 @@ for(i in 1:length(files))   {
         column.headings <- colnames(file.content);
 
     #   extract relevant metadata from file name
-    mouse.id <- get.mouse.id(file.name);
-    slide.num <- get.slide.num(file.name);
-    stain.num <- get.stain.num(file.name);
+    mouse.idnum <- get.mouse.id(file.name);
+    slide.number <- get.slide.num(file.name);
+    stain.number <- get.stain.num(file.name);
+    
+    #Adds stain number to stain.numbers if it does not already exist in the vector
+    if(!stain.number %in% stain.numbers) {
+      stain.numbers <- c(stain.numbers, stain.number)
+    }
     
     #   prepend metadata to file content
-    file.content <- cbind(mouse.id, slide.num, stain.num, file.content);
+    file.content <- cbind(mouse.idnum, slide.number, file.content);
     
     #   append file content to output data.frame
     output <- rbind(output, file.content);
@@ -151,7 +158,9 @@ colnames(output) <- predefined.column.headers;
 for(i in 1:length(colnames(output)))
     output[,i] <- as.numeric(output[,i]);
 
-write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
+#Works for now, but not for each stain, since each has to be on its own sheet
+#write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
+workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
 
 
