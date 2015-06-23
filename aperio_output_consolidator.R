@@ -162,6 +162,10 @@ for(i in 1:length(colnames(output)))
 #write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
+#  Create a sheet in the master workbook for each stain
+for( i in 1:length(stain.numbers)) {
+  createSheet(workbook, name = "Stain " + as.character(stain.numbers[i]))
+}
 
 
 
