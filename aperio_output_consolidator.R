@@ -171,10 +171,9 @@ currentSheets <- getSheets(workbook)
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
   output.subset <- output[output$stain.number==stain.numbers[i],]
-  print(output.subset)
-  appendWorksheet(workbook, output.subset, sheet = stain.number, header = TRUE)
-  saveWorkbook(workbook)
+  appendWorksheet(workbook, output.subset, sheet = currentSheets[i], header = TRUE)
+  print(stain.number)
 }
 
 
-
+saveWorkbook(workbook)
