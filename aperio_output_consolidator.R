@@ -116,6 +116,10 @@ workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
 #   for all files in the directory
 for(i in 1:length(files))   {
+  
+    #  data.frame to hold data until it is written
+    file.data <- data.frame()
+    #output <- c(output, file.data)
     #   get current file name
     file.name <- files[i];
 
@@ -141,10 +145,14 @@ for(i in 1:length(files))   {
     }
     
     #   prepend metadata to file content
-    file.content <- cbind(mouse.idnum, slide.number, file.content);
+    file.content <- cbind(stain.number,mouse.idnum, slide.number, file.content);
     
     #   append file content to output data.frame
     output <- rbind(output, file.content);
+    
+    #  get the current sheets in the master workbook
+    currentSheets <- getSheets(workbook)
+    
 }   #   for i
     
 #-------------------------------------------------------------------------
@@ -153,14 +161,16 @@ for(i in 1:length(files))   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-colnames(output) <- predefined.column.headers;
+#for(i in 1:length(output))
+#colnames(output) <- predefined.column.headers;
 
 #   convert factors to numbers
 #       the double-nested "as" functions appear to be necessary; simply converting to numeric
 #       causes big rounding errors
-for(i in 1:length(colnames(output)))
-    output[,i] <- as.numeric(output[,i]);
+#for(i in 1:length(colnames(output)))
+ #   output[,i] <- as.numeric(output[,i]);
 
+print(output)
 #Works for now, but not for each stain, since each has to be on its own sheet
 #write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
-saveWorkbook(workbook, file = "consolidated_files.xlsx")
+saveWorkbook(workbook)
