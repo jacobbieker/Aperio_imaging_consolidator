@@ -137,7 +137,7 @@ for(i in 1:length(files))   {
     if(!stain.number %in% stain.numbers) {
       stain.numbers <- c(stain.numbers, stain.number)
       #  Create a sheet in the master workbook for each stain
-      createSheet(workbook, name = "Stain " + as.character(stain.number))
+      createSheet(workbook, name = stain.number)
     }
     
     #   prepend metadata to file content
@@ -163,7 +163,4 @@ for(i in 1:length(colnames(output)))
 
 #Works for now, but not for each stain, since each has to be on its own sheet
 #write.xlsx(output, file="consolidated_output.xlsx", sheetName="Consolidated files", row.names=FALSE);
-
-
-
-
+saveWorkbook(workbook, file = "consolidated_files.xlsx")
