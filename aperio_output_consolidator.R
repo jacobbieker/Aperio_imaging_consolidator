@@ -24,7 +24,8 @@
 #-------------------------------------------------------------------------
 #   load appropriate libraries
 library(readxl);
-library(xlsx);
+library(XLConnect);
+library(yaml);
 
 #   TODO:  move this to config file
 predefined.column.headers <- c("Mouse ID",
@@ -81,8 +82,8 @@ get.slide.num <- function(file.name)   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#   identify all files in the directory
-files <- list.files(getwd());
+#   identify all .xls files in the directory 
+files <- list.files(getwd(), pattern = ".xls");
 #   discard this file
 script.index <- which(files == "consolidator.R");
 files <- files[-script.index];
@@ -98,7 +99,7 @@ output <- data.frame();
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#   for all files in the director
+#   for all files in the directory
 for(i in 1:length(files))   {
     #   get current file name
     file.name <- files[i];
