@@ -18,7 +18,7 @@
 #             mouse_3_slide_2_stain_5.xls
 #
 #       Note that the delimitator between each component of the file name can be 
-#       any of the following: ".", ",", "\", "/", " ", or "_"
+#       any of the following: ",", " ", or "_"
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -27,12 +27,13 @@
 #-------------------------------------------------------------------------
 #   load appropriate libraries
 library(readxl);
-library(XLConnect);
-library(yaml);
+library(xlsx);
+#library(yaml);
 
 #   TODO:  move this to config file
 predefined.column.headers <- c("Mouse ID",
                     "Slide Number",
+                    "Stain Number",
                     "Region",
                     "Length (um)",
                     "Area (um2)",
@@ -67,7 +68,7 @@ get.mouse.id <- function(file.name) {
     #   remove file extension
     file.name <- strsplit(file.name, "\\.")[[1]][1];
     #   extract mouse number
-    mouse.id <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][2];
+    mouse.id <- strsplit(file.name, "_")[[1]][2];
     return(mouse.id);
 }   #   get.mouse.id()
 
@@ -75,16 +76,16 @@ get.slide.num <- function(file.name)   {
     #   remove file extension
     file.name <- strsplit(file.name, "\\.")[[1]][1];
     #   extract mouse number
-    slide.num <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][4];    
+    print(strsplit(file.name, "_"))
+    slide.num <- strsplit(file.name, "_")[[1]][4];    
     return(slide.num);    
 }   #   get.slide.num()
 
 get.stain.num <- function(file.name)   {
   #   remove file extension
   file.name <- strsplit(file.name, "\\.")[[1]][1];
-  #   extract stain number, if it exists
-  if(strsplit(file.name, "_"))
-  stain.num <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][6];
+  #   extract stain number
+  stain.num <- strsplit(file.name, "_")[[1]][6];
   return(stain.num);    
 }   #   get.stain.num()
 #-------------------------------------------------------------------------
@@ -96,8 +97,8 @@ get.stain.num <- function(file.name)   {
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls");
 #   discard this file
-script.index <- which(files == "consolidator.R");
-files <- files[-script.index];
+#script.index <- which(files == "consolidator.R");
+#files <- files[-script.index];
 
 #   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
 
@@ -127,9 +128,10 @@ for(i in 1:length(files))   {
     #   extract relevant metadata from file name
     mouse.id <- get.mouse.id(file.name);
     slide.num <- get.slide.num(file.name);
+    stain.num <- get.stain.num(file.name);
     
     #   prepend metadata to file content
-    file.content <- cbind(mouse.id, slide.num, file.content);
+    file.content <- cbind(mouse.id, slide.num, stain.num, file.content);
     
     #   append file content to output data.frame
     output <- rbind(output, file.content);
