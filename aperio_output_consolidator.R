@@ -59,12 +59,12 @@ predefined.column.headers <- c("Mouse ID",
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#   utility functions
+#   utility functions for mouse_MM_slide_NN_stain_NN.xls
 get.mouse.id <- function(file.name) {
     #   remove file extension
     file.name <- strsplit(file.name, "\\.")[[1]][1];
     #   extract mouse number
-    mouse.id <- strsplit(file.name, "_")[[1]][2];
+    mouse.id <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][2];
     return(mouse.id);
 }   #   get.mouse.id()
 
@@ -72,10 +72,18 @@ get.slide.num <- function(file.name)   {
     #   remove file extension
     file.name <- strsplit(file.name, "\\.")[[1]][1];
     #   extract mouse number
-    slide.num <- strsplit(file.name, "_")[[1]][4];    
+    slide.num <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][4];    
     return(slide.num);    
 }   #   get.slide.num()
 
+get.stain.num <- function(file.name)   {
+  #   remove file extension
+  file.name <- strsplit(file.name, "\\.")[[1]][1];
+  #   extract stain number, if it exists
+  if(strsplit(file.name, "_"))
+  stain.num <- strsplit(file.name, "_|\\|\.|,|\/|\ ")[[1]][6];    
+  return(stain.num);    
+}   #   get.stain.num()
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Setup
