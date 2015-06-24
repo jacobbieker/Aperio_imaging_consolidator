@@ -201,6 +201,20 @@ writeWorksheet(workbook, date(), sheet = "summary", header = FALSE)
 #create summary data.frame to put all the summary info into
 mouse.summary.output <- data.frame();
 
+#Create the columns for the data to go in
+summary.col.names <- c();
+for(i in 1:length(stain.numbers)) {
+  #put in the initial names
+  if(i==1){
+    summary.col.names <- c("Mouse ID", as.character(stain.numbers[i]))
+    } else {
+      summary.col.names <- c(summary.col.names, as.character(stain.numbers[i]))
+  }
+}
+
+#Apply column names to the summary output
+colnames(mouse.summary.output) <- summary.col.names
+
 #subset data for each mouse and perform calulations on it
 for(i in 1:length(mouse.ids)) {
   for(i in 1:length(stain.numbers)) {
