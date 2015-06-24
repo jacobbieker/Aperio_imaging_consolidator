@@ -147,11 +147,8 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
-#   convert factors to numbers
-#       the double-nested "as" functions appear to be necessary; simply converting to numeric
-#       causes big rounding errors
-for(i in 1:length(colnames(output)))
-  output[,i] <- as.numeric(output[,i]);
+
+
 
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
@@ -179,6 +176,14 @@ saveWorkbook(workbook)
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+#   convert factors to numbers
+#       the double-nested "as" functions appear to be necessary; simply converting to numeric
+#       causes big rounding errors
+for(i in 1:length(colnames(output))) {
+  output[,i] <- as.numeric(output[,i]);
+}
+
+
 #Layout of data: Mouse 1: Stain 1 Stain 2 Stain 3.... Avg
 createSheet(workbook, name = "summary")
 
@@ -199,23 +204,13 @@ for(i in 1:length(stain.numbers)) {
 
 #subset data for each mouse and perform calulations on it
 for(i in 1:length(mouse.ids)) {
-  #subset the data.frame
-  mouse.data.current <- output[output$`Mouse ID`==mouse.ids[i],]
-  #Loop through each stain for each mouse
   for(i in 1:length(stain.numbers)) {
+    #subset output for current mouse and stain numbers
+    mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[i])
     #check if the stain for the mouse data exists
-    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`)
-    mouse.data.current.stain <- mouse.data.current[mouse.data.current$`Stain Num`==stain.numbers[i],]
-    
-    #Issue: Not numeric or logical have to convert it to numeric
-    print(summary(output))
-    
-    print(summary(mouse.data.current.stain))
-    #Perform the calculations
-    #average.size <- with(mouse.data.current.stain, mean(`Area of Analysis (mm^2)`))
-    #average.size <- colMeans(mouse.data.current.stain$`Area of Analysis (mm^2)`, na.rm = TRUE)
-    average.cells <- colMeans(mouse.data.current.stain$`Total Nuclei`, na.rm = TRUE)
-    average.cellpermm <- average.cells/average.size
+    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`) {
+      
+    }
     
   }
 }
