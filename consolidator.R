@@ -118,7 +118,6 @@ for(i in 1:length(files))   {
       #  Create a sheet in the master workbook for each stain
       createSheet(workbook, name = stain.number)
     }
-    
     #   prepend metadata to file content
     file.content <- cbind(stain.number,mouse.idnum, slide.number, file.content);
     
@@ -136,17 +135,31 @@ for(i in 1:length(files))   {
 
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
-print(output)
-#  get the current sheets in the master workbook
+
+#  get the current sheets in the master workbook, which is in the same order
+#  as stain.number
 currentSheets <- getSheets(workbook)
+
+#TODO Use the list of names from the config file to choose dataframe columns
+#Instead of hardcoding it in
+
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
   output.subset <- output[output$`Stain Num`==stain.numbers[i],]
   #Drops the Stain number from the data.frame before writing it
   output.subset$`Stain Num` <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
-  appendWorksheet(workbook, output.subset, sheet = currentSheets[i], header = TRUE)
+  writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
 
 #saves and actually writes the data to an Excel file
 saveWorkbook(workbook)
+
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#   Summary of Data
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
+createSheet(workbook, name = "summary")
