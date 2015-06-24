@@ -208,7 +208,11 @@ for(i in 1:length(mouse.ids)) {
     mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[i])
     #check if the stain for the mouse data exists
     if(stain.numbers[i] %in% mouse.data.current$`Stain Num`) {
-      
+      #Perform the calculations
+      #   Averaging to get the number of cells per mm per stain and mouse
+      average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`)
+      average.cells <- mean(mouse.data.current$`Total Nuclei`)
+      average.cellpermm <- average.cells/average.size
     }
     
   }
