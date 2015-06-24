@@ -32,7 +32,6 @@ library(yaml);
 
 #loads column names from config file config.yml
 predefined.column.headers <- yaml.load_file("config.yml")
-print(predefined.column.headers)
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -183,17 +182,33 @@ writeWorksheet(workbook, date(), sheet = "summary", header = FALSE)
 #create summary data.frame to put all the summary info into
 mouse.summary.output <- data.frame();
 
+#sets the first column name to the second name in config
+#colnames(mouse.summary.output) <- c(predefined.column.headers[2])
+
+#Add colname for each stain present
+for(i in 1:length(stain.numbers)) {
+  column.stain.number <- as.character(stain.numbers[i])
+  mouse.summary.output$column.stain.number <- c();
+}
+
 #subset data for each mouse and perform calulations on it
 for(i in 1:length(mouse.ids)) {
   #subset the data.frame
-  mouse.data.current <- output[output$`Mouse ID`==mouse.ids[i]]
+  mouse.data.current <- output[output$`Mouse ID`==mouse.ids[i],]
   #Loop through each stain for each mouse
   for(i in 1:length(stain.numbers)) {
-    mouse.data.current.stain <- output[output$`Stain Num`==stain.numbers[i]]
+    #check if the stain for the mouse data exists
+    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`)
+    mouse.data.current.stain <- mouse.data.current[mouse.data.current$`Stain Num`==stain.numbers[i]]
     #Perform the calculations
-    average.size <- mean(mouse.data.current.strain$`Area of Analysis (mm^2)`)
+    average.size <- mean(mouse.data.current.stain$`Area of Analysis (mm^2)`)
     average.cells <- mean(mouse.data.current.stain$`Total Nuclei`)
     average.cellpermm <- average.cells/average.size
     
   }
 }
+
+
+
+#Save to workbook after creating the summary
+saveWorkbook(workbook)
