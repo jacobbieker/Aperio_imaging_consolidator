@@ -71,6 +71,11 @@ get.stain.num <- function(file.name)   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+#Remove previous xlsx files, JUST FOR TESTING
+fn <- "consolidated_files.xlsx"
+if(file.exists(fn))
+  file.remove(fn)
+
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls");
 #   discard this file
@@ -85,7 +90,8 @@ output <- list()
 stain.numbers <- c();
 #   create workbook to save the data to
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
-
+#   create vector to store the different mice id for use in the summary
+mouse.ids <- c();
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Read workbook contents into R
@@ -118,6 +124,12 @@ for(i in 1:length(files))   {
       #  Create a sheet in the master workbook for each stain
       createSheet(workbook, name = stain.number)
     }
+    
+    #Adds stain number to stain.numbers if it does not already exist in the vector
+    if(!mouse.idnum %in% mouse.ids) {
+      mouse.ids <- c(mouse.ids, mouse.idnum)
+    }
+    
     #   prepend metadata to file content
     file.content <- cbind(stain.number,mouse.idnum, slide.number, file.content);
     
@@ -162,4 +174,26 @@ saveWorkbook(workbook)
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+#Layout of data: Mouse 1: Stain 1 Stain 2 Stain 3.... Avg
 createSheet(workbook, name = "summary")
+
+#Write the data of the summary run in the top left corner
+writeWorksheet(workbook, date(), sheet = "summary", header = FALSE)
+
+#create summary data.frame to put all the summary info into
+mouse.summary.output <- data.frame();
+
+#subset data for each mouse and perform calulations on it
+for(i in 1:length(mouse.ids)) {
+  #subset the data.frame
+  mouse.data.current <- output[output$`Mouse ID`==mouse.ids[i]]
+  #Loop through each stain for each mouse
+  for(i in 1:length(stain.numbers)) {
+    mouse.data.current.stain <- output[output$`Stain Num`==stain.numbers[i]]
+    #Perform the calculations
+    average.size <- mean(mouse.data.current.strain$`Area of Analysis (mm^2)`)
+    average.cells <- mean(mouse.data.current.stain$`Total Nuclei`)
+    average.cellpermm <- average.cells/average.size
+    
+  }
+}
