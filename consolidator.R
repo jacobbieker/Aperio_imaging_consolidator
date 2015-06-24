@@ -52,7 +52,6 @@ get.slide.num <- function(file.name)   {
     #   remove file extension
     file.name <- strsplit(file.name, "\\.")[[1]][1];
     #   extract mouse number
-    print(strsplit(file.name, "_"))
     slide.num <- strsplit(file.name, "_")[[1]][4];    
     return(slide.num);    
 }   #   get.slide.num()
@@ -144,8 +143,15 @@ for(i in 1:length(files))   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
+
+#   convert factors to numbers
+#       the double-nested "as" functions appear to be necessary; simply converting to numeric
+#       causes big rounding errors
+for(i in 1:length(colnames(output)))
+  output[,i] <- as.numeric(output[,i]);
 
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
@@ -199,10 +205,16 @@ for(i in 1:length(mouse.ids)) {
   for(i in 1:length(stain.numbers)) {
     #check if the stain for the mouse data exists
     if(stain.numbers[i] %in% mouse.data.current$`Stain Num`)
-    mouse.data.current.stain <- mouse.data.current[mouse.data.current$`Stain Num`==stain.numbers[i]]
+    mouse.data.current.stain <- mouse.data.current[mouse.data.current$`Stain Num`==stain.numbers[i],]
+    
+    #Issue: Not numeric or logical have to convert it to numeric
+    print(summary(output))
+    
+    print(summary(mouse.data.current.stain))
     #Perform the calculations
-    average.size <- mean(mouse.data.current.stain$`Area of Analysis (mm^2)`)
-    average.cells <- mean(mouse.data.current.stain$`Total Nuclei`)
+    #average.size <- with(mouse.data.current.stain, mean(`Area of Analysis (mm^2)`))
+    #average.size <- colMeans(mouse.data.current.stain$`Area of Analysis (mm^2)`, na.rm = TRUE)
+    average.cells <- colMeans(mouse.data.current.stain$`Total Nuclei`, na.rm = TRUE)
     average.cellpermm <- average.cells/average.size
     
   }
