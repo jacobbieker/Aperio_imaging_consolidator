@@ -28,34 +28,11 @@
 #   load appropriate libraries
 library(readxl);
 library(XLConnect);
-#library(yaml);
+library(yaml);
 
-#   TODO:  move this to config file
-predefined.column.headers <- c("Stain Num",
-  "Mouse ID",
-                    "Slide Number",
-                    "Region",
-                    "Length (um)",
-                    "Area (um2)",
-                    "Text",
-                    "Percent Positive Nuclei",
-                    "Intensity Score",
-                    "(3+) Percent Nuclei",
-                    "(2+) Percent Nuclei",
-                    "(1+) Percent Nuclei",
-                    "(0+) Percent Nuclei",
-                    "Average Positive Intensity",
-                    "Average Negative Intensity",
-                    "(3+) Nuclei",
-                    "(2+) Nuclei",
-                    "(1+) Nuclei",
-                    "(0+) Nuclei",
-                    "Total Nuclei",
-                    "Average Nuclear RGB Intensity",
-                    "Average Nuclear Size (Pixels)",
-                    "Average Nuclear Size (um^2)",
-                    "Area of Analysis (Pixels)",
-                    "Area of Analysis (mm^2)");
+#loads column names from config file config.yml
+predefined.column.headers <- yaml.load_file("config.yml")
+print(predefined.column.headers)
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -159,7 +136,7 @@ for(i in 1:length(files))   {
 
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
-
+print(output)
 #  get the current sheets in the master workbook
 currentSheets <- getSheets(workbook)
 for(i in 1:length(currentSheets)) {
