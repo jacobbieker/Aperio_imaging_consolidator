@@ -31,7 +31,7 @@ library(XLConnect);
 library(yaml);
 
 #loads column names from config file config.yml
-predefined.column.headers <- yaml.load_file("config.yml")
+predefined.column.headers <- yaml.load_file("config.yml");
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -70,24 +70,21 @@ get.stain.num <- function(file.name)   {
 #-------------------------------------------------------------------------
 
 #Remove previous xlsx files, JUST FOR TESTING
-fn <- "consolidated_files.xlsx"
+fn <- "consolidated_files.xlsx";
 if(file.exists(fn))
-  file.remove(fn)
+  file.remove(fn);
 
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls");
-#   discard this file
-#script.index <- which(files == "consolidator.R");
-#files <- files[-script.index];
 
 #   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
 
 #   create list to hold output data.frames
-output <- list()
+output <- list();
 #   create vector for storing the different stain numbers so that diff sheets created
 stain.numbers <- c();
 #   create workbook to save the data to
-workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
+workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
 mouse.ids <- c();
 #-------------------------------------------------------------------------
@@ -118,14 +115,14 @@ for(i in 1:length(files))   {
     
     #Adds stain number to stain.numbers if it does not already exist in the vector
     if(!stain.number %in% stain.numbers) {
-      stain.numbers <- c(stain.numbers, stain.number)
+      stain.numbers <- c(stain.numbers, stain.number);
       #  Create a sheet in the master workbook for each stain
-      createSheet(workbook, name = stain.number)
+      createSheet(workbook, name = stain.number);
     }
     
     #Adds stain number to stain.numbers if it does not already exist in the vector
     if(!mouse.idnum %in% mouse.ids) {
-      mouse.ids <- c(mouse.ids, mouse.idnum)
+      mouse.ids <- c(mouse.ids, mouse.idnum);
     }
     
     #   prepend metadata to file content
@@ -152,7 +149,7 @@ colnames(output) <- predefined.column.headers;
 
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
-currentSheets <- getSheets(workbook)
+currentSheets <- getSheets(workbook);
 
 #TODO Use the list of names from the config file to choose dataframe columns
 #Instead of hardcoding it in
@@ -167,7 +164,7 @@ for(i in 1:length(currentSheets)) {
 }
 
 #saves and actually writes the data to an Excel file
-saveWorkbook(workbook)
+saveWorkbook(workbook);
 
 
 #-------------------------------------------------------------------------
@@ -180,26 +177,58 @@ saveWorkbook(workbook)
 #       Not elegant, but needed so that the first three columns are converted
 #       to their numeric values and not factor level values
 output<- sapply(output, function(x) if(is.factor(x)) {
-  as.numeric(as.character(x))
+  as.numeric(as.character(x));
 } else {
-  as.numeric(x)
+  as.numeric(x);
 })
-output <- data.frame(output)
+output <- data.frame(output);
+
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
 
 #Convert to numeric
-mouse.ids <- as.numeric(mouse.ids)
-stain.numbers <- as.numeric(stain.numbers)
+mouse.ids <- as.numeric(mouse.ids);
+stain.numbers <- as.numeric(stain.numbers);
 
 #Create the sheet for the summary
-createSheet(workbook, name = "summary")
+createSheet(workbook, name = "summary");
 
 #Write the data of the summary run in the top left corner
-writeWorksheet(workbook, date(), sheet = "summary", header = FALSE)
+writeWorksheet(workbook, date(), sheet = "summary", header = FALSE);
 
 #create summary data.frame to put all the summary info into
 mouse.summary.output <- data.frame();
+
+#subset data for each mouse and perform calulations on it
+for(i in 1:length(mouse.ids)) {
+  #vector to store the data before putting into summary output
+  current.summary <- c();
+  #Add the mouse ID to the current.summary
+  current.summary <- c(current.summary, mouse.ids[i])
+  for(i in 1:length(stain.numbers)) {
+    #subset output for current mouse and stain numbers
+    mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[i])
+    #Append mouse ID to the summary
+    #check if the stain for the mouse data exists
+    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`) {
+      #Perform the calculations
+      #   Averaging to get the number of cells per mm per stain and mouse
+      average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`);
+      average.cells <- mean(mouse.data.current$`Total Nuclei`);
+      average.cellpermm <- average.cells/average.size;
+      #Append average cell to current summary
+      current.summary <- c(current.summary, average.cellpermm)
+    } else {
+      #Put in 0 for NA values for now
+      current.summary <- c(current.summary, 0)
+      print(str(current.summary))
+    }
+    
+  }
+  #End of inside for loop
+  #save the current.summary to overall summary
+  mouse.summary.output <- rbind(mouse.summary.output, current.summary)
+}
 
 #Create the columns for the data to go in
 summary.col.names <- c();
@@ -207,30 +236,13 @@ for(i in 1:length(stain.numbers)) {
   #put in the initial names
   if(i==1){
     summary.col.names <- c("Mouse ID", as.character(stain.numbers[i]))
-    } else {
-      summary.col.names <- c(summary.col.names, as.character(stain.numbers[i]))
+  } else {
+    summary.col.names <- c(summary.col.names, as.character(stain.numbers[i]))
   }
 }
 
 #Apply column names to the summary output
 colnames(mouse.summary.output) <- summary.col.names
-
-#subset data for each mouse and perform calulations on it
-for(i in 1:length(mouse.ids)) {
-  for(i in 1:length(stain.numbers)) {
-    #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[i])
-    #check if the stain for the mouse data exists
-    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`) {
-      #Perform the calculations
-      #   Averaging to get the number of cells per mm per stain and mouse
-      average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`)
-      average.cells <- mean(mouse.data.current$`Total Nuclei`)
-      average.cellpermm <- average.cells/average.size
-    }
-    
-  }
-}
 
 
 
