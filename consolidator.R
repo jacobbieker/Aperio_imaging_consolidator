@@ -177,14 +177,22 @@ saveWorkbook(workbook)
 #-------------------------------------------------------------------------
 
 #   convert factors to numbers
-#       the double-nested "as" functions appear to be necessary; simply converting to numeric
-#       causes big rounding errors
-for(i in 1:length(colnames(output))) {
-  output[,i] <- as.numeric(output[,i]);
-}
+#       Not elegant, but needed so that the first three columns are converted
+#       to their numeric values and not factor level values
+output<- sapply(output, function(x) if(is.factor(x)) {
+  as.numeric(as.character(x))
+} else {
+  as.numeric(x)
+})
+output <- data.frame(output)
+#Reassign column names lost in above step
+colnames(output) <- predefined.column.headers;
 
+#Convert to numeric
+mouse.ids <- as.numeric(mouse.ids)
+stain.numbers <- as.numeric(stain.numbers)
 
-#Layout of data: Mouse 1: Stain 1 Stain 2 Stain 3.... Avg
+#Create the sheet for the summary
 createSheet(workbook, name = "summary")
 
 #Write the data of the summary run in the top left corner
@@ -192,15 +200,6 @@ writeWorksheet(workbook, date(), sheet = "summary", header = FALSE)
 
 #create summary data.frame to put all the summary info into
 mouse.summary.output <- data.frame();
-
-#sets the first column name to the second name in config
-#colnames(mouse.summary.output) <- c(predefined.column.headers[2])
-
-#Add colname for each stain present
-for(i in 1:length(stain.numbers)) {
-  column.stain.number <- as.character(stain.numbers[i])
-  mouse.summary.output$column.stain.number <- c();
-}
 
 #subset data for each mouse and perform calulations on it
 for(i in 1:length(mouse.ids)) {
