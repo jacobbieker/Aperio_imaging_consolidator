@@ -31,7 +31,8 @@ library(XLConnect);
 #library(yaml);
 
 #   TODO:  move this to config file
-predefined.column.headers <- c("Mouse ID",
+predefined.column.headers <- c("Stain Num",
+  "Mouse ID",
                     "Slide Number",
                     "Region",
                     "Length (um)",
@@ -116,10 +117,7 @@ workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE)
 
 #   for all files in the directory
 for(i in 1:length(files))   {
-  
-    #  data.frame to hold data until it is written
-    file.data <- data.frame()
-    #output <- c(output, file.data)
+
     #   get current file name
     file.name <- files[i];
 
@@ -150,6 +148,7 @@ for(i in 1:length(files))   {
     #   append file content to output data.frame
     output <- rbind(output, file.content);
     
+    
 }   #   for i
     
 #-------------------------------------------------------------------------
@@ -158,22 +157,14 @@ for(i in 1:length(files))   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#   convert factors to numbers
-#       the double-nested "as" functions appear to be necessary; simply converting to numeric
-#       causes big rounding errors
-#for(i in 1:length(colnames(output)))
- #   output[,i] <- as.numeric(output[,i]);
-
-#print(output)
-
 #  get the current sheets in the master workbook
 currentSheets <- getSheets(workbook)
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
   output.subset <- output[output$stain.number==stain.numbers[i],]
+  #Get rid of stain number on columns, since that is stored in sheet name
   appendWorksheet(workbook, output.subset, sheet = currentSheets[i], header = TRUE)
-  print(stain.number)
 }
 
-
+#saves and actually writes the data to an Excel file
 saveWorkbook(workbook)
