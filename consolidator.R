@@ -202,28 +202,23 @@ mouse.summary.output <- data.frame();
 #subset data for each mouse and perform calulations on it
 for(i in 1:length(mouse.ids)) {
   #vector to store the data before putting into summary output
-  current.summary <- c();
+  current.summary <- NULL;
   #Add the mouse ID to the current.summary
   current.summary <- c(current.summary, mouse.ids[i])
   for(i in 1:length(stain.numbers)) {
     #subset output for current mouse and stain numbers
     mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[i])
-    #Append mouse ID to the summary
-    #check if the stain for the mouse data exists
-    if(stain.numbers[i] %in% mouse.data.current$`Stain Num`) {
+    print(str(mouse.data.current))
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
       average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`);
+      print(average.size)
       average.cells <- mean(mouse.data.current$`Total Nuclei`);
+      print(average.cells)
       average.cellpermm <- average.cells/average.size;
+      print(average.cellpermm)
       #Append average cell to current summary
       current.summary <- c(current.summary, average.cellpermm)
-    } else {
-      #Put in 0 for NA values for now
-      current.summary <- c(current.summary, 0)
-      print(str(current.summary))
-    }
-    
   }
   #End of inside for loop
   #save the current.summary to overall summary
