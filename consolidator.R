@@ -208,21 +208,14 @@ for(i in 1:length(mouse.ids)) {
   for(j in 1:length(stain.numbers)) {
     #subset output for current mouse and stain numbers
     mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[j])
-    #print(str(mouse.data.current))
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
       average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`);
-      #print(average.size)
       average.cells <- mean(mouse.data.current$`Total Nuclei`);
-      #print(average.cells)
       average.cellpermm <- average.cells/average.size;
-      print("Stain")
-      print(stain.numbers[j])
-      print(average.cellpermm)
       #Append average cell to current summary
       current.summary <- c(current.summary, average.cellpermm)
   }
-  #print(current.summary)
   #End of inside for loop
   #save the current.summary to overall summary
   mouse.summary.output <- rbind(mouse.summary.output, current.summary)
@@ -241,6 +234,8 @@ for(i in 1:length(stain.numbers)) {
 
 #Apply column names to the summary output
 colnames(mouse.summary.output) <- summary.col.names
+
+writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 2)
 
 #Save to workbook after creating the summary
 saveWorkbook(workbook)
