@@ -157,11 +157,16 @@ for(i in 1:length(files))   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+#Assign the column names to the data.frame
+colnames(output) <- predefined.column.headers;
+
 #  get the current sheets in the master workbook
 currentSheets <- getSheets(workbook)
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
-  output.subset <- output[output$stain.number==stain.numbers[i],]
+  output.subset <- output[output$`Stain Num`==stain.numbers[i],]
+  #Drops the Stain number from the data.frame before writing it
+  output.subset$`Stain Num` <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
   appendWorksheet(workbook, output.subset, sheet = currentSheets[i], header = TRUE)
 }
