@@ -224,9 +224,10 @@ for(i in 1:length(mouse.ids)) {
 #Create the columns for the data to go in
 summary.col.names <- c();
 for(i in 1:length(stain.numbers)) {
+  stain.name <- paste0("Stain ", as.character(stain.numbers[i]))
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Mouse ID", as.character(stain.numbers[i]))
+    summary.col.names <- c("Mouse ID", stain.name)
   } else {
     summary.col.names <- c(summary.col.names, as.character(stain.numbers[i]))
   }
