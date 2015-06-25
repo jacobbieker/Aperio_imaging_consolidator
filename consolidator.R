@@ -231,8 +231,8 @@ for(i in 1:length(mouse.ids)) {
 average.header <- createCellStyle(workbook, name = "AvgHeader")
 
 #Set foreground color for average.header
-setFillPattern(average.header, XLC$"FILL.SOLID_FOREGROUND")
-setFillForegroundColor(average.header, XLC$"COLOR.BLUE")
+setFillPattern(average.header, XLC$FILL.SOLID_FOREGROUND)
+setFillForegroundColor(average.header, XLC$COLOR.TURQUOISE)
 setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLACK)
 
 #    Create header for above the stain numbers
@@ -242,7 +242,7 @@ mergeCells(workbook, sheet = "summary", reference)
 mergedCellsIndex <- seq(2, length(stain.numbers)+1, 1)
 
 #Write to the worksheet
-writeWorksheet(workbook, "Average Cells/mm", sheet = "summary", 3, 2, header = FALSE)
+writeWorksheet(workbook, "Average Cells/mm Per Stain", sheet = "summary", 3, 2, header = FALSE)
 #Set CellStyle to average.header
 setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex, cellstyle = average.header)
 
