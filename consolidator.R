@@ -233,6 +233,7 @@ average.header <- createCellStyle(workbook, name = "AvgHeader")
 #Set foreground color for average.header
 setFillPattern(average.header, XLC$"FILL.SOLID_FOREGROUND")
 setFillForegroundColor(average.header, XLC$"COLOR.BLUE")
+setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLACK)
 
 #    Create header for above the stain numbers
 #have reference to get correct number of columns
