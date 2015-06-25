@@ -144,21 +144,15 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
-
-
-
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
 currentSheets <- getSheets(workbook);
 
-#TODO Use the list of names from the config file to choose dataframe columns
-#Instead of hardcoding it in
-
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
-  output.subset <- output[output$`Stain Num`==stain.numbers[i],]
+  output.subset <- output[output[,1]==stain.numbers[i],]
   #Drops the Stain number from the data.frame before writing it
-  output.subset$`Stain Num` <- NULL
+  output.subset[,1] <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
@@ -207,11 +201,11 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- c(current.summary, mouse.ids[i])
   for(j in 1:length(stain.numbers)) {
     #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[j])
+    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.numbers[j])
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
-      average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`);
-      average.cells <- mean(mouse.data.current$`Total Nuclei`);
+      average.size <- mean(mouse.data.current[,25]);
+      average.cells <- mean(mouse.data.current[,20]);
       average.cellpermm <- average.cells/average.size;
       #Append average cell to current summary
       current.summary <- c(current.summary, average.cellpermm)
