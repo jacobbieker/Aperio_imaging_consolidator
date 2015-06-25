@@ -221,22 +221,47 @@ for(i in 1:length(mouse.ids)) {
   mouse.summary.output <- rbind(mouse.summary.output, current.summary)
 }
 
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#   Formatting Excel Document
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+
+#  Create CellStyles to use later
+average.header <- createCellStyle(workbook, name = "AvgHeader")
+
+#Set foreground color for average.header
+setFillPattern(average.header, XLC$"FILL.SOLID_FOREGROUND")
+setFillForegroundColor(average.header, XLC$"COLOR.BLUE")
+
+#    Create header for above the stain numbers
+#have reference to get correct number of columns
+reference <- paste0("B3:", LETTERS[length(stain.numbers)+1], "3")
+mergeCells(workbook, sheet = "summary", reference)
+mergedCellsIndex <- seq(2, length(stain.numbers)+1, 1)
+
+#Write to the worksheet
+writeWorksheet(workbook, "Average Cells/mm", sheet = "summary", 3, 2, header = FALSE)
+#Set CellStyle to average.header
+setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex, cellstyle = average.header)
+
 #Create the columns for the data to go in
 summary.col.names <- c();
+
 for(i in 1:length(stain.numbers)) {
-  stain.name <- paste0("Stain ", as.character(stain.numbers[i]))
+  stain.name <- paste0("Stain ", as.character(stain.numbers[i]));
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Mouse ID", stain.name)
+    summary.col.names <- c("Mouse ID", stain.name);
   } else {
-    summary.col.names <- c(summary.col.names, as.character(stain.numbers[i]))
+    summary.col.names <- c(summary.col.names, stain.name);
   }
 }
 
 #Apply column names to the summary output
 colnames(mouse.summary.output) <- summary.col.names
 
-writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 2)
+writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4)
 
 #Save to workbook after creating the summary
 saveWorkbook(workbook)
