@@ -22,3 +22,29 @@
        Other valid names include:
        
        _3__2__5.xls
+
+#   HOW TO USE
+There are a few ways to use this script. 
+
+Pre-requisites: R 3.1.0 or higher is installed on the computer being used
+
+For Windows users: 
+
+1. Download config.yml and aperio_consolidator.bat to your computer. 
+2. Move all the .xls files from Aperio into one folder, renamed to follow the
+above format
+3. Place config and aperio_consolidator in the same folder as in the previous step
+4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
+5. Double click on aperio_consolidator.bat to run the program
+6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
+
+
+For Mac OSX/Linux users:
+
+1. Download config.yml and aperio_consolidator.sh to your computer. 
+2. Move all the .xls files from Aperio into one folder, renamed to follow the
+above format
+3. Place config and aperio_consolidator in the same folder as in the previous step
+4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
+5. Double click on aperio_consolidator.sh to run the program
+6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
