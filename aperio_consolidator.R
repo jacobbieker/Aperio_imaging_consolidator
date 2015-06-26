@@ -25,6 +25,21 @@
 #   Configuration
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# Check if libraries are installed, if not, install them
+if(require("XLConnect") & require("yaml") & require("readxl")){
+  print("XLConnect, yaml, and readxl are loaded correctly")
+} else {
+  print("trying to install XLConnect, yaml, and readxl")
+  install.packages("XLConnect")
+  install.packages("yaml")
+  install.packages("readxl")
+  if(require(lme4)){
+    print("XLConnect, yaml, and readxl are installed and loaded")
+  } else {
+    stop("could not install XLConnect, yaml, or readxl")
+  }
+}
+
 #   load appropriate libraries
 library(readxl);
 library(XLConnect);

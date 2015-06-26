@@ -27,6 +27,7 @@
 There are a few ways to use this script. 
 
 Pre-requisites: R 3.1.0 or higher is installed on the computer being used
+                Internet connection to install required libraries if they are not already installed
 
 For Windows users: 
 
