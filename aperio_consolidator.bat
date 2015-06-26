@@ -1,3 +1,45 @@
+@echo off
+
+:: A batch script for running R scripts in M$ XP
+:: Just attach your R script to the end of this batch file (below the
+:: last ":::" comment line) and run this script.
+
+:: A portion of this file was taken from Gabor Grothendieck's
+:: batchfiles http://cran.r-project.org/contrib/extra/batchfiles/
+:: Copyright by Gabor Grothendieck 2005, GPL v2
+
+setlocal
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: I could not get this to work on M$ 2k
+ver | findstr XP >NUL
+if errorlevel 1 echo Warning: This script only works on Windows XP.
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Find R.
+:: use environment variable R_HOME if defined
+:: else current folder if bin\rcmd.exe exists
+:: else most current R as determined by registry entry
+:: else error, not found.
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+if not defined R_HOME if exist bin\rcmd.exe set R_HOME=%CD%
+if not defined R_HOME for /f "tokens=2*" %%a in (
+  'reg query hkcu\software\r-core\r /v InstallPath 2^>NUL ^| findstr InstallPath'
+  ) do set R_HOME=%%~b
+if not defined R_HOME for /f "tokens=2*" %%a in (
+  'reg query hklm\software\r-core\r /v InstallPath 2^>NUL ^| findstr InstallPath'
+   ) do set R_HOME=%%~b
+if not defined R_HOME echo Error: R not found. Please install R (www.r-project.org). & pause & exit /b
+
+set cmdpath=%R_HOME%\bin\R.exe
+set thisfile=%~f0
+
+:: Run R.  Make it parse the commands at the end of this file
+echo x=readLines(Sys.getenv('thisfile'));eval(parse(text=x[-(1:grep('Put R code below',x)[2])]))  | "%cmdpath%" --vanilla
+
+endlocal
+exit /b
+
+:::::::::::::::::::  Put R code below this line :::::::::::::::::::::
 
 # Designed and developed by Patrick Leyshock (leyshock@ohsu.edu) And Jacob Bieker (jacob@bieker.us)
 
@@ -144,21 +186,15 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
-
-
-
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
 currentSheets <- getSheets(workbook);
 
-#TODO Use the list of names from the config file to choose dataframe columns
-#Instead of hardcoding it in
-
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
-  output.subset <- output[output$`Stain Num`==stain.numbers[i],]
+  output.subset <- output[output[,1]==stain.numbers[i],]
   #Drops the Stain number from the data.frame before writing it
-  output.subset$`Stain Num` <- NULL
+  output.subset[,1] <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
@@ -207,11 +243,11 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- c(current.summary, mouse.ids[i])
   for(j in 1:length(stain.numbers)) {
     #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output$`Mouse ID`==mouse.ids[i] & output$`Stain Num`==stain.numbers[j])
+    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.numbers[j])
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
-      average.size <- mean(mouse.data.current$`Area of Analysis (mm^2)`);
-      average.cells <- mean(mouse.data.current$`Total Nuclei`);
+      average.size <- mean(mouse.data.current[,25]);
+      average.cells <- mean(mouse.data.current[,20]);
       average.cellpermm <- average.cells/average.size;
       #Append average cell to current summary
       current.summary <- c(current.summary, average.cellpermm)
