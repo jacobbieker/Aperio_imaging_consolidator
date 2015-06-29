@@ -49,3 +49,23 @@ above format
 4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 5. Double click on aperio_consolidator.sh to run the program
 6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
+
+
+# Testing
+
+To test this program, open the testing subfolder. If necessary, edit the testConfig.yml file to change the testing
+parameters. 
+
+Run test.py to create dummy test files based off any input file. 
+
+Currently has to be to manually checked against expected files (stored in expected)
+
+Cases currently covered: 
+- Large sets (>4000) of files
+
+Cases needed to be covered:
+- Empty files?
+- Partially empty rows?
+- Columns not lining up
+- Naming convention errors
+

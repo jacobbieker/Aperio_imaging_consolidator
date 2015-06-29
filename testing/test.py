@@ -20,7 +20,6 @@ num_slides = config['slides']
 #Directory to the location of the script and input files
 rootdir = 'C:\Development\SU2C_pancreatic_cancer'
 
-
 #######################################################################################
 #
 #       Start of testing using large set of file
