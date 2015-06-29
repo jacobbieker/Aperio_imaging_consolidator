@@ -25,6 +25,11 @@
 #   Configuration
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# Uncomment below if the JVM is running out of heap space
+# Default should be fine for most data sets, tested on > 6000 files w/o 
+# using this option
+# options(java.parameters = "-Xmx1024m")
+
 # Check if libraries are installed, if not, install them
 if(require("XLConnect") & require("yaml") & require("readxl")){
   print("XLConnect, yaml, and readxl are loaded correctly")
