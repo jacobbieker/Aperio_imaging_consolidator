@@ -71,13 +71,13 @@ get.slide.num <- function(file.name)   {
     return(slide.num);    
 }   #   get.slide.num()
 
-get.stain.num <- function(file.name)   {
+get.stain.name <- function(file.name)   {
   #   remove file extension
   file.name <- strsplit(file.name, "\\.")[[1]][1];
   #   extract stain number
-  stain.num <- strsplit(file.name, "_")[[1]][6];
-  return(stain.num);    
-}   #   get.stain.num()
+  stain.name <- strsplit(file.name, "_")[[1]][6];
+  return(stain.name);    
+}   #   get.stain.name()
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Setup
@@ -97,7 +97,7 @@ files <- list.files(getwd(), pattern = ".xls");
 #   create list to hold output data.frames
 output <- list();
 #   create vector for storing the different stain numbers so that diff sheets created
-stain.numbers <- c();
+stain.names <- c();
 #   create workbook to save the data to
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
@@ -126,22 +126,22 @@ for(i in 1:length(files))   {
     #   extract relevant metadata from file name
     mouse.idnum <- get.mouse.id(file.name);
     slide.number <- get.slide.num(file.name);
-    stain.number <- get.stain.num(file.name);
+    stain.nameber <- get.stain.name(file.name);
     
-    #Adds stain number to stain.numbers if it does not already exist in the vector
-    if(!stain.number %in% stain.numbers) {
-      stain.numbers <- c(stain.numbers, stain.number);
+    #Adds stain number to stain.names if it does not already exist in the vector
+    if(!stain.nameber %in% stain.names) {
+      stain.names <- c(stain.names, stain.nameber);
       #  Create a sheet in the master workbook for each stain
-      createSheet(workbook, name = stain.number);
+      createSheet(workbook, name = stain.nameber);
     }
     
-    #Adds stain number to stain.numbers if it does not already exist in the vector
+    #Adds stain number to stain.names if it does not already exist in the vector
     if(!mouse.idnum %in% mouse.ids) {
       mouse.ids <- c(mouse.ids, mouse.idnum);
     }
     
     #   prepend metadata to file content
-    file.content <- cbind(stain.number,mouse.idnum, slide.number, file.content);
+    file.content <- cbind(stain.nameber,mouse.idnum, slide.number, file.content);
     
     #   append file content to output data.frame
     output <- rbind(output, file.content);
@@ -160,12 +160,12 @@ for(i in 1:length(files))   {
 colnames(output) <- predefined.column.headers;
 
 #  get the current sheets in the master workbook, which is in the same order
-#  as stain.number
+#  as stain.nameber
 currentSheets <- getSheets(workbook);
 
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
-  output.subset <- output[output[,1]==stain.numbers[i],]
+  output.subset <- output[output[,1]==stain.names[i],]
   #Drops the Stain number from the data.frame before writing it
   output.subset[,1] <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
@@ -182,22 +182,37 @@ saveWorkbook(workbook);
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
+#Subset output so that Stain Num are not converted and stay strings
+#Then add back in to data.frame 
+factor_to_numbers <- output
+factor_to_numbers$'Stain' <- NULL
+
 #   convert factors to numbers
 #       Not elegant, but needed so that the first three columns are converted
 #       to their numeric values and not factor level values
-output<- sapply(output, function(x) if(is.factor(x)) {
+factor_to_numbers<- sapply(factor_to_numbers, function(x) if(is.factor(x)) {
   as.numeric(as.character(x));
 } else {
   as.numeric(x);
 })
-output <- data.frame(output);
+
+factor_to_numbers <- data.frame(factor_to_numbers)
+#Reassign stain back to the temp data.frame
+factor_to_numbers$'Stain' <- output$'Stain'
+#Output is then given the modified data.frame for use in the rest of the script
+output <- factor_to_numbers
+
+#Reorder so that Stain is the first column, like it was originally
+output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
+
+#output <- data.frame(output);
 
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
 
 #Convert to numeric
 mouse.ids <- as.numeric(mouse.ids);
-stain.numbers <- as.numeric(stain.numbers);
+stain.names <- as.numeric(stain.names);
 
 #Create the sheet for the summary
 createSheet(workbook, name = "summary");
@@ -214,9 +229,9 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- NULL;
   #Add the mouse ID to the current.summary
   current.summary <- c(current.summary, mouse.ids[i])
-  for(j in 1:length(stain.numbers)) {
+  for(j in 1:length(stain.names)) {
     #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.numbers[j])
+    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.names[j])
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
       average.size <- mean(mouse.data.current[,25]);
@@ -246,9 +261,9 @@ setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLA
 
 #    Create header for above the stain numbers
 #have reference to get correct number of columns
-reference <- paste0("B3:", LETTERS[length(stain.numbers)+1], "3")
+reference <- paste0("B3:", LETTERS[length(stain.names)+1], "3")
 mergeCells(workbook, sheet = "summary", reference)
-mergedCellsIndex <- seq(2, length(stain.numbers)+1, 1)
+mergedCellsIndex <- seq(2, length(stain.names)+1, 1)
 
 #Write to the worksheet
 writeWorksheet(workbook, "Average Cells/mm Per Stain", sheet = "summary", 3, 2, header = FALSE)
@@ -258,8 +273,8 @@ setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex, cells
 #Create the columns for the data to go in
 summary.col.names <- c();
 
-for(i in 1:length(stain.numbers)) {
-  stain.name <- paste0("Stain ", as.character(stain.numbers[i]));
+for(i in 1:length(stain.names)) {
+  stain.name <- paste0("Stain ", as.character(stain.names[i]));
   #put in the initial names
   if(i==1){
     summary.col.names <- c("Mouse ID", stain.name);
