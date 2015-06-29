@@ -68,4 +68,5 @@ Cases needed to be covered:
 - Partially empty rows?
 - Columns not lining up
 - Naming convention errors
-
+- Hundreds of regions in a single file
+- .xlsx files already present in directory
