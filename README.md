@@ -10,18 +10,18 @@
    1.  script is located in same directory as input files
    3.  input .xls files follow this naming convention:
 
-             mouse_NN_slide_MM_stain_MM.xls
+             mouse_NN_slide_MM_stain_NAME.xls
 
-       so for mouse 3, slide 2, stain 5, the file name should be:
+       so for mouse 3, slide 2, stain BRDU, the file name should be:
 
-             mouse_3_slide_2_stain_5.xls
+             mouse_3_slide_2_stain_BRDU.xls
 
        Note that the delimitator between each component of the file name can be 
        any of the following: "_"
        
        Other valid names include:
        
-              _3__2__5.xls
+              _3__2__BRDU.xls
 
 #   HOW TO USE
 There are a few ways to use this script. 
