@@ -205,14 +205,11 @@ output <- factor_to_numbers
 #Reorder so that Stain is the first column, like it was originally
 output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
 
-#output <- data.frame(output);
-
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
 
 #Convert to numeric
 mouse.ids <- as.numeric(mouse.ids);
-stain.names <- as.numeric(stain.names);
 
 #Create the sheet for the summary
 createSheet(workbook, name = "summary");
