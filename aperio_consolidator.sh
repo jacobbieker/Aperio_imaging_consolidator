@@ -86,7 +86,8 @@
     stain.name <- strsplit(file.name, "_")[[1]][6];
     #Checks if stain name does not exist, because the output will be messed up if so
     if (is.na(stain.name)) {
-      noStainError <- paste0("Warning: File ", file.name, " does not have stain name included, please rename and rerun script")
+      noStainError <- paste0("Warning: File ", file.name, " does not conform to the naming convention
+                           , please rename file and rerun script")
       stop(noStainError)
     }
     return(stain.name);
