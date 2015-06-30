@@ -64,11 +64,7 @@ Currently has to be to manually checked against expected files (stored in expect
 
 Cases currently covered: 
 - Large sets (>4000) of files
+- Missing stain name -> Throws error with the file name
 
 Cases needed to be covered:
-- Empty files?
-- Partially empty rows?
-- Columns not lining up
-- Naming convention errors
-- Hundreds of regions in a single file
-- .xlsx files already present in directory
+- Naming convention errors besides just missing last section
