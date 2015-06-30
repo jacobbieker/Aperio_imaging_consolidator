@@ -25,28 +25,14 @@
 #   Configuration
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
-# Uncomment below if the JVM is running out of heap space
-# Default should be fine for most data sets, tested on > 6000 files w/o 
-# using this option
-# options(java.parameters = "-Xmx1024m")
-
-# Check if libraries are installed, if not, install them
-if(require("XLConnect") & require("readxl")){
-  print("XLConnect, yaml, and readxl are loaded correctly")
-} else {
-  print("trying to install XLConnect, and readxl")
-  install.packages("XLConnect")
-  install.packages("readxl")
-  if(require("XLConnect") & require("readxl")){
-    print("XLConnect, and readxl are installed and loaded")
-  } else {
-    stop("could not install XLConnect, or readxl")
-  }
+# NEED TO INCLUDE LIBRARIES
+options(echo=TRUE);
+names(labkey.data);
+labkey.data$folder
+file.names <- labkey.data$name
+for(name in file.names) {
+  print(name)
 }
-
-#   load appropriate libraries
-library(readxl);
-library(XLConnect);
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -115,22 +101,11 @@ predefined.column.headers <- c("Stain",
                                "Average Nuclear Size (um^2)",
                                "Area of Analysis (Pixels)",
                                "Area of Analysis (mm^2)");
-
-#Remove previous xlsx files, JUST FOR TESTING
-fn <- "consolidated_files.xlsx";
-if(file.exists(fn))
-  file.remove(fn);
-
-#   identify all .xls files in the directory 
-files <- list.files(getwd(), pattern = ".xls");
-
-#   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
-
 #   create list to hold output data.frames
 output <- list();
 #   create vector for storing the different stain numbers so that diff sheets created
 stain.names <- c();
-#   create workbook to save the data to
+#Load workbook
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
 mouse.ids <- c();
