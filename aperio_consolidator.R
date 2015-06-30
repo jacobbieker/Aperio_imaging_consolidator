@@ -38,7 +38,7 @@ if(require("XLConnect") & require("yaml") & require("readxl")){
   install.packages("XLConnect")
   install.packages("yaml")
   install.packages("readxl")
-  if(require(lme4)){
+  if(require("XLConnect") & require("yaml") & require("readxl")){
     print("XLConnect, yaml, and readxl are installed and loaded")
   } else {
     stop("could not install XLConnect, yaml, or readxl")
@@ -81,7 +81,13 @@ get.stain.name <- function(file.name)   {
   file.name <- strsplit(file.name, "\\.")[[1]][1];
   #   extract stain number
   stain.name <- strsplit(file.name, "_")[[1]][6];
-  return(stain.name);    
+  #Checks if stain name does not exist, because the output will be messed up if so
+  if (is.na(stain.name)) {
+    print("Warning: File does not have stain name included, please rename and rerun script")
+    print("File name is:")
+    print(file.name)
+  }
+  return(stain.name);
 }   #   get.stain.name()
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -89,13 +95,13 @@ get.stain.name <- function(file.name)   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#Remove previous xlsx files, JUST FOR TESTING
+#Remove older consolidated_files file
 fn <- "consolidated_files.xlsx";
 if(file.exists(fn))
   file.remove(fn);
 
 #   identify all .xls files in the directory 
-files <- list.files(getwd(), pattern = ".xls");
+files <- list.files(getwd(), pattern = ".xls$");
 
 #   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
 
