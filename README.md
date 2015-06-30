@@ -22,6 +22,8 @@
        Other valid names include:
        
               _3__2__BRDU.xls
+              
+      If the file name does not include the stain, the script will print out a warning and the relevant file name.
 
 #   HOW TO USE
 There are a few ways to use this script. 

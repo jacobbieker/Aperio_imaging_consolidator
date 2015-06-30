@@ -83,9 +83,8 @@ get.stain.name <- function(file.name)   {
   stain.name <- strsplit(file.name, "_")[[1]][6];
   #Checks if stain name does not exist, because the output will be messed up if so
   if (is.na(stain.name)) {
-    print("Warning: File does not have stain name included, please rename and rerun script")
-    print("File name is:")
-    print(file.name)
+    noStainError <- paste0("Warning: File ", file.name, " does not have stain name included, please rename and rerun script")
+    stop(noStainError)
   }
   return(stain.name);
 }   #   get.stain.name()
@@ -102,8 +101,6 @@ if(file.exists(fn))
 
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls$");
-
-#   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
 
 #   create list to hold output data.frames
 output <- list();

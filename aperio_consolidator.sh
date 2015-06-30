@@ -1,4 +1,4 @@
-"#!/bin/bash"
+#!/usr/bin/env bash
   R --vanilla << "EOF"      #  Pipe all subsequent lines into R.
   ################ Put all your R code here  ###############
   # Designed and developed by Patrick Leyshock (leyshock@ohsu.edu) And Jacob Bieker (jacob@bieker.us)

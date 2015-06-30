@@ -51,9 +51,6 @@ library(XLConnect);
 library(yaml);
 library(Rlabkey);
 
-#loads column names from config file config.yml
-predefined.column.headers <- yaml.load_file("config.yml");
-
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Utility functions
@@ -82,6 +79,11 @@ get.stain.name <- function(file.name)   {
   file.name <- strsplit(file.name, "\\.")[[1]][1];
   #   extract stain number
   stain.name <- strsplit(file.name, "_")[[1]][6];
+  #Checks if stain name does not exist, because the output will be messed up if so
+  if (is.na(stain.name)) {
+    noStainError <- paste0("Warning: File ", file.name, " does not have stain name included, please rename and rerun script")
+    stop(noStainError)
+  }
   return(stain.name);    
 }   #   get.stain.name()
 #-------------------------------------------------------------------------
@@ -89,6 +91,33 @@ get.stain.name <- function(file.name)   {
 #   Setup
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+
+#Moved from config file so that it could work in R view
+predefined.column.headers <- c("Stain",
+                               "Mouse ID",
+                               "Slide Number",
+                               "Region",
+                               "Length (um)",
+                               "Area (um2)",
+                               "Text",
+                               "Percent Positive Nuclei",
+                               "Intensity Score",
+                               "(3+) Percent Nuclei",
+                               "(2+) Percent Nuclei",
+                               "(1+) Percent Nuclei",
+                               "(0+) Percent Nuclei",
+                               "Average Positive Intensity",
+                               "Average Negative Intensity",
+                               "(3+) Nuclei",
+                               "(2+) Nuclei",
+                               "(1+) Nuclei",
+                               "(0+) Nuclei",
+                               "Total Nuclei",
+                               "Average Nuclear RGB Intensity",
+                               "Average Nuclear Size (Pixels)",
+                               "Average Nuclear Size (um^2)",
+                               "Area of Analysis (Pixels)",
+                               "Area of Analysis (mm^2)");
 
 #Remove previous xlsx files, JUST FOR TESTING
 fn <- "consolidated_files.xlsx";
