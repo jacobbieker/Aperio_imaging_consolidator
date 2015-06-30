@@ -67,6 +67,11 @@ exit /b
 #   Configuration
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
+# Uncomment below if the JVM is running out of heap space
+# Default should be fine for most data sets, tested on > 6000 files w/o 
+# using this option
+# options(java.parameters = "-Xmx1024m")
+
 # Check if libraries are installed, if not, install them
 if(require("XLConnect") & require("yaml") & require("readxl")){
   print("XLConnect, yaml, and readxl are loaded correctly")
@@ -75,7 +80,7 @@ if(require("XLConnect") & require("yaml") & require("readxl")){
   install.packages("XLConnect")
   install.packages("yaml")
   install.packages("readxl")
-  if(require(lme4)){
+  if(require("XLConnect") & require("yaml") & require("readxl")){
     print("XLConnect, yaml, and readxl are installed and loaded")
   } else {
     stop("could not install XLConnect, yaml, or readxl")
@@ -98,19 +103,19 @@ predefined.column.headers <- yaml.load_file("config.yml");
 
 #   utility functions for mouse_MM_slide_NN_stain_NN.xls
 get.mouse.id <- function(file.name) {
-    #   remove file extension
-    file.name <- strsplit(file.name, "\\.")[[1]][1];
-    #   extract mouse number
-    mouse.id <- strsplit(file.name, "_")[[1]][2];
-    return(mouse.id);
+  #   remove file extension
+  file.name <- strsplit(file.name, "\\.")[[1]][1];
+  #   extract mouse number
+  mouse.id <- strsplit(file.name, "_")[[1]][2];
+  return(mouse.id);
 }   #   get.mouse.id()
 
 get.slide.num <- function(file.name)   {
-    #   remove file extension
-    file.name <- strsplit(file.name, "\\.")[[1]][1];
-    #   extract mouse number
-    slide.num <- strsplit(file.name, "_")[[1]][4];    
-    return(slide.num);    
+  #   remove file extension
+  file.name <- strsplit(file.name, "\\.")[[1]][1];
+  #   extract mouse number
+  slide.num <- strsplit(file.name, "_")[[1]][4];    
+  return(slide.num);    
 }   #   get.slide.num()
 
 get.stain.name <- function(file.name)   {
@@ -118,7 +123,12 @@ get.stain.name <- function(file.name)   {
   file.name <- strsplit(file.name, "\\.")[[1]][1];
   #   extract stain number
   stain.name <- strsplit(file.name, "_")[[1]][6];
-  return(stain.name);    
+  #Checks if stain name does not exist, because the output will be messed up if so
+  if (is.na(stain.name)) {
+    noStainError <- paste0("Warning: File ", file.name, " does not have stain name included, please rename and rerun script")
+    stop(noStainError)
+  }
+  return(stain.name);
 }   #   get.stain.name()
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -126,15 +136,13 @@ get.stain.name <- function(file.name)   {
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#Remove previous xlsx files, JUST FOR TESTING
+#Remove older consolidated_files file
 fn <- "consolidated_files.xlsx";
 if(file.exists(fn))
   file.remove(fn);
 
 #   identify all .xls files in the directory 
-files <- list.files(getwd(), pattern = ".xls");
-
-#   TODO: perform some error-checking, e.g. confirm that all files are .xls files, etc.
+files <- list.files(getwd(), pattern = ".xls$");
 
 #   create list to hold output data.frames
 output <- list();
@@ -152,45 +160,45 @@ mouse.ids <- c();
 
 #   for all files in the directory
 for(i in 1:length(files))   {
-
-    #   get current file name
-    file.name <- files[i];
-
-    #   read in file content
-    file.content <- read_excel(path=file.name,
-                              sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
-                              col_names=TRUE);
-    
-    #   extract column headings, for output (and possibly QC), for the first file only
-    if(i == 1)
-        column.headings <- colnames(file.content);
-
-    #   extract relevant metadata from file name
-    mouse.idnum <- get.mouse.id(file.name);
-    slide.number <- get.slide.num(file.name);
-    stain.nameber <- get.stain.name(file.name);
-    
-    #Adds stain number to stain.names if it does not already exist in the vector
-    if(!stain.nameber %in% stain.names) {
-      stain.names <- c(stain.names, stain.nameber);
-      #  Create a sheet in the master workbook for each stain
-      createSheet(workbook, name = stain.nameber);
-    }
-    
-    #Adds stain number to stain.names if it does not already exist in the vector
-    if(!mouse.idnum %in% mouse.ids) {
-      mouse.ids <- c(mouse.ids, mouse.idnum);
-    }
-    
-    #   prepend metadata to file content
-    file.content <- cbind(stain.nameber,mouse.idnum, slide.number, file.content);
-    
-    #   append file content to output data.frame
-    output <- rbind(output, file.content);
-    
-    
+  
+  #   get current file name
+  file.name <- files[i];
+  
+  #   read in file content
+  file.content <- read_excel(path=file.name,
+                             sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
+                             col_names=TRUE);
+  
+  #   extract column headings, for output (and possibly QC), for the first file only
+  if(i == 1)
+    column.headings <- colnames(file.content);
+  
+  #   extract relevant metadata from file name
+  mouse.idnum <- get.mouse.id(file.name);
+  slide.number <- get.slide.num(file.name);
+  stain.nameber <- get.stain.name(file.name);
+  
+  #Adds stain number to stain.names if it does not already exist in the vector
+  if(!stain.nameber %in% stain.names) {
+    stain.names <- c(stain.names, stain.nameber);
+    #  Create a sheet in the master workbook for each stain
+    createSheet(workbook, name = stain.nameber);
+  }
+  
+  #Adds stain number to stain.names if it does not already exist in the vector
+  if(!mouse.idnum %in% mouse.ids) {
+    mouse.ids <- c(mouse.ids, mouse.idnum);
+  }
+  
+  #   prepend metadata to file content
+  file.content <- cbind(stain.nameber,mouse.idnum, slide.number, file.content);
+  
+  #   append file content to output data.frame
+  output <- rbind(output, file.content);
+  
+  
 }   #   for i
-    
+
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Export results
@@ -271,13 +279,13 @@ for(i in 1:length(mouse.ids)) {
   for(j in 1:length(stain.names)) {
     #subset output for current mouse and stain numbers
     mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.names[j])
-      #Perform the calculations
-      #   Averaging to get the number of cells per mm per stain and mouse
-      average.size <- mean(mouse.data.current[,25]);
-      average.cells <- mean(mouse.data.current[,20]);
-      average.cellpermm <- average.cells/average.size;
-      #Append average cell to current summary
-      current.summary <- c(current.summary, average.cellpermm)
+    #Perform the calculations
+    #   Averaging to get the number of cells per mm per stain and mouse
+    average.size <- mean(mouse.data.current[,25]);
+    average.cells <- mean(mouse.data.current[,20]);
+    average.cellpermm <- average.cells/average.size;
+    #Append average cell to current summary
+    current.summary <- c(current.summary, average.cellpermm)
   }
   #End of inside for loop
   #save the current.summary to overall summary
