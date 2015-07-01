@@ -7,9 +7,7 @@
 #   Output is a single .xlsx worksheet
 #
 # Assumptions:
-#   1.  script is located in same directory as input files
-#   2.  directory containing input files contains only this script, plus .xls files to be consolidated
-#   3.  input .xls files follow this naming convention:
+#   1.  input .xls files follow this naming convention:
 #
 #             mouse_NN_slide_MM_stain_MM.xls
 #
@@ -25,12 +23,13 @@
 #   Configuration
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
-# NEED TO INCLUDE LIBRARIES
 options(echo=TRUE);
-names(labkey.data);
-labkey.data$folder
-file.names <- labkey.data$name
-for(name in file.names) {
+library(XLConnect);
+library(readxl);
+
+#Get the names of the files uploaded
+files <- labkey.data$name
+for(name in files) {
   print(name)
 }
 
