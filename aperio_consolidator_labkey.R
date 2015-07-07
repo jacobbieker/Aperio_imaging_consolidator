@@ -29,9 +29,6 @@ library(readxl);
 
 #Get the names of the files uploaded
 files <- labkey.data$name
-for(name in files) {
-  print(name)
-}
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------

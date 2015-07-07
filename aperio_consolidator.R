@@ -240,9 +240,12 @@ for(i in 1:length(mouse.ids)) {
     mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.names[j])
     #Perform the calculations
     #   Averaging to get the number of cells per mm per stain and mouse
+    #   First 3+ 2+ and 1+ average
     average.size <- mean(mouse.data.current[,25]);
     average.cells <- mean(mouse.data.current[,20]);
     average.cellpermm <- average.cells/average.size;
+    #   Then 3+ 2+ average
+    #   Last 3+ average
     #Append average cell to current summary
     current.summary <- c(current.summary, average.cellpermm)
   }
