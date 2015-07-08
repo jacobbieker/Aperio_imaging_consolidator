@@ -276,14 +276,14 @@ setFillForegroundColor(average.header, XLC$COLOR.TURQUOISE)
 
 #    Create header for above the stain numbers
 #have reference to get correct number of columns
-reference <- paste0("B3:", LETTERS[(3 * length(stain.names))+1], "3")
+reference <- paste0("C3:", LETTERS[(3 * length(stain.names))+2], "3")
 mergeCells(workbook, sheet = "summary", reference)
 mergedCellsIndex <- seq(2, length(stain.names)+1, 1)
 
 #Write to the worksheet
-writeWorksheet(workbook, "Average Cells/mm Per Stain for (3+, 2+, 1+), (3+, 2+), and (3+)", sheet = "summary", 3, 2, header = FALSE)
+writeWorksheet(workbook, "Average Cells/mm Per Stain for (3+, 2+, 1+), (3+, 2+), and (3+)", sheet = "summary", 3, 3, header = FALSE)
 #Set CellStyle to average.header
-setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex, cellstyle = average.header)
+setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex+1, cellstyle = average.header)
 
 #Create the columns for the data to go in
 summary.col.names <- c();
@@ -292,8 +292,9 @@ for(i in 1:length(stain.names)) {
   stain.name <- paste0("Stain ", as.character(stain.names[i]));
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Mouse ID", stain.name);
+    summary.col.names <- c("Group", "Mouse ID", stain.name);
   } else {
+    # Very hack-y method at the moment
     summary.col.names <- c(summary.col.names, "NA", "NA", stain.name);
   }
 }
@@ -313,9 +314,9 @@ for(i in 1:length(stain.names)) {
   #have reference to get correct number of columns
   # TODO add support for if the stains go into the double letter range
   if (i == 1) {
-    mergeCells(workbook, sheet = "summary", "B4:D4")
+    mergeCells(workbook, sheet = "summary", "C4:E4")
   } else {
-  reference <- paste0(LETTERS[index+2],"4:", LETTERS[index+4], "4")
+  reference <- paste0(LETTERS[index+3],"4:", LETTERS[index+5], "4")
   print(reference)
   mergeCells(workbook, sheet = "summary", reference)
 }
