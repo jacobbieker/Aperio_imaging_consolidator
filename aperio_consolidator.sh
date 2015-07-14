@@ -87,7 +87,7 @@
     #Checks if stain name does not exist, because the output will be messed up if so
     if (is.na(stain.name)) {
       noStainError <- paste0("Warning: File ", file.name, " does not conform to the naming convention
-                           , please rename file and rerun script")
+                             , please rename file and rerun script")
       stop(noStainError)
     }
     return(stain.name);
@@ -171,28 +171,6 @@
   #Assign the column names to the data.frame
   colnames(output) <- predefined.column.headers;
   
-  #  get the current sheets in the master workbook, which is in the same order
-  #  as stain.nameber
-  currentSheets <- getSheets(workbook);
-  
-  for(i in 1:length(currentSheets)) {
-    # Selects the subset of the output that has the same stain number
-    output.subset <- output[output[,1]==stain.names[i],]
-    #Drops the Stain number from the data.frame before writing it
-    output.subset[,1] <- NULL
-    #Get rid of stain number on columns, since that is stored in sheet name
-    writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
-  }
-  
-  #saves and actually writes the data to an Excel file
-  saveWorkbook(workbook);
-  
-  
-  #-------------------------------------------------------------------------
-  #-------------------------------------------------------------------------
-  #   Summary of Data
-  #-------------------------------------------------------------------------
-  #-------------------------------------------------------------------------
   
   #Subset output so that Stain Num are not converted and stay strings
   #Then add back in to data.frame 
@@ -223,6 +201,30 @@
   #Convert to numeric
   mouse.ids <- as.numeric(mouse.ids);
   
+  #  get the current sheets in the master workbook, which is in the same order
+  #  as stain.nameber
+  currentSheets <- getSheets(workbook);
+  
+  for(i in 1:length(currentSheets)) {
+    # Selects the subset of the output that has the same stain number
+    output.subset <- output[output[,1]==stain.names[i],]
+    #Drops the Stain number from the data.frame before writing it
+    output.subset[,1] <- NULL
+    #Get rid of stain number on columns, since that is stored in sheet name
+    writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
+  }
+  
+  #saves and actually writes the data to an Excel file
+  saveWorkbook(workbook);
+  
+  
+  #-------------------------------------------------------------------------
+  #-------------------------------------------------------------------------
+  #   Summary of Data
+  #-------------------------------------------------------------------------
+  #-------------------------------------------------------------------------
+  
+  
   #Create the sheet for the summary
   createSheet(workbook, name = "summary");
   
@@ -244,10 +246,17 @@
       #Perform the calculations
       #   Averaging to get the number of cells per mm per stain and mouse
       average.size <- mean(mouse.data.current[,25]);
-      average.cells <- mean(mouse.data.current[,20]);
-      average.cellpermm <- average.cells/average.size;
+      #   First 3+ 2+ and 1+ average
+      average.cells321 <- mean(mouse.data.current[,16]+mouse.data.current[,17]+mouse.data.current[,18]);
+      average.321cellpermm <- average.cells321/average.size;
+      #   Then 3+ 2+ average
+      average.cells32 <- mean(mouse.data.current[,16]+mouse.data.current[,17]);
+      average.32cellpermm <- average.cells32/average.size;
+      #   Last 3+ average
+      average.cells3 <- mean(mouse.data.current[,16]);
+      average.3cellpermm <- average.cells3/average.size;
       #Append average cell to current summary
-      current.summary <- c(current.summary, average.cellpermm)
+      current.summary <- c(current.summary, average.321cellpermm, average.32cellpermm, average.3cellpermm);
     }
     #End of inside for loop
     #save the current.summary to overall summary
@@ -266,18 +275,18 @@
   #Set foreground color for average.header
   setFillPattern(average.header, XLC$FILL.SOLID_FOREGROUND)
   setFillForegroundColor(average.header, XLC$COLOR.TURQUOISE)
-  setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLACK)
+  #setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLACK)
   
   #    Create header for above the stain numbers
   #have reference to get correct number of columns
-  reference <- paste0("B3:", LETTERS[length(stain.names)+1], "3")
+  reference <- paste0("C3:", LETTERS[(3 * length(stain.names))+2], "3")
   mergeCells(workbook, sheet = "summary", reference)
   mergedCellsIndex <- seq(2, length(stain.names)+1, 1)
   
   #Write to the worksheet
-  writeWorksheet(workbook, "Average Cells/mm Per Stain", sheet = "summary", 3, 2, header = FALSE)
+  writeWorksheet(workbook, "Average Cells/mm Per Stain for (3+, 2+, 1+), (3+, 2+), and (3+)", sheet = "summary", 3, 3, header = FALSE)
   #Set CellStyle to average.header
-  setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex, cellstyle = average.header)
+  setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex+1, cellstyle = average.header)
   
   #Create the columns for the data to go in
   summary.col.names <- c();
@@ -286,11 +295,41 @@
     stain.name <- paste0("Stain ", as.character(stain.names[i]));
     #put in the initial names
     if(i==1){
-      summary.col.names <- c("Mouse ID", stain.name);
+      summary.col.names <- c("Group", "Mouse ID", stain.name);
     } else {
-      summary.col.names <- c(summary.col.names, stain.name);
+      # Very hack-y method at the moment
+      summary.col.names <- c(summary.col.names, "NA", "NA", stain.name);
     }
   }
+  
+  # Make stain names span 3 columns so that the different averages can be included below
+  #  Create CellStyles to use later
+  stain.header <- createCellStyle(workbook, name = "StainHeader")
+  
+  #Create the columns for the data to go in
+  summary.stain.names <- c();
+  #Index to track where to put the next header
+  index <- 0
+  
+  for(i in 1:length(stain.names)) {
+    stain.name <- paste0("Stain ", as.character(stain.names[i]));
+    #    Create header for above the stain numbers
+    #have reference to get correct number of columns
+    # TODO add support for if the stains go into the double letter range
+    if (i == 1) {
+      mergeCells(workbook, sheet = "summary", "C4:E4")
+    } else {
+    reference <- paste0(LETTERS[index+3],"4:", LETTERS[index+5], "4")
+    print(reference)
+    mergeCells(workbook, sheet = "summary", reference)
+  }
+    #Write to the worksheet
+    writeWorksheet(workbook, stain.name, sheet = "summary", 4, 2, header = FALSE)
+    #up index by three since each stain takes up three columns
+    index <- index + 3
+  }
+  
+  
   
   #Apply column names to the summary output
   colnames(mouse.summary.output) <- summary.col.names
