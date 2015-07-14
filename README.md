@@ -37,12 +37,12 @@ For Windows users:
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
 3. Place config and aperio_consolidator in the same folder as in the previous step
-![Screenshot](https://raw.githubusercontent.com/jacobbieker/SU2C_pancreatic_cancer/master/Doc_images/Aperio_Docs_Shot_1.PNG?token=AG1pN3f-rvsUCmKCnwPYqoiNE0rIdjHjks5VrpaHwA%3D%3D)
+![Screenshot](/Doc_images/Aperio_Docs_Shot_1.PNG?token=AG1pN3f-rvsUCmKCnwPYqoiNE0rIdjHjks5VrpaHwA%3D%3D)
 4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 5. Double click on aperio_consolidator.bat to run the program
-![Screenshot](https://raw.githubusercontent.com/jacobbieker/SU2C_pancreatic_cancer/master/Doc_images/Aperio_Docs_Shot_2.PNG?token=AG1pNxlT7NWzM8xUqpzf2fYxQW-Lxt1Uks5VrpbFwA%3D%3D)
+![Screenshot](/Doc_images/Aperio_Docs_Shot_2.PNG?token=AG1pNxlT7NWzM8xUqpzf2fYxQW-Lxt1Uks5VrpbFwA%3D%3D)
 6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
-![Screenshot](https://raw.githubusercontent.com/jacobbieker/SU2C_pancreatic_cancer/master/Doc_images/Aperio_Docs_Shot_3.PNG?token=AG1pNzhYwTZkB68-6ZWCcYn3rnEW2quJks5Vrpb9wA%3D%3D)
+![Screenshot](/Doc_images/Aperio_Docs_Shot_3.PNG?token=AG1pNzhYwTZkB68-6ZWCcYn3rnEW2quJks5Vrpb9wA%3D%3D)
 
 
 For Mac OSX/Linux users:
