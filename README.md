@@ -37,7 +37,7 @@ For Windows users:
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
 3. Place config and aperio_consolidator in the same folder as in the previous step
-.. image:: https://github.com/jacobbieker/SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_1.png
+![Screenshot](https://raw.githubusercontent.com/jacobbieker/SU2C_pancreatic_cancer/master/Doc_images/Aperio_Docs_Shot_1.PNG?token=AG1pN3f-rvsUCmKCnwPYqoiNE0rIdjHjks5VrpaHwA%3D%3D)
 4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 5. Double click on aperio_consolidator.bat to run the program
 .. image:: SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_2.PNG
