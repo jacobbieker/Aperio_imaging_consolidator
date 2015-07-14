@@ -40,7 +40,7 @@ above format
 .. image:: https://github.com/jacobbieker/SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_1.png
 4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 5. Double click on aperio_consolidator.bat to run the program
-.. image:: https://github.com/jacobbieker/SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_2.png
+.. image:: SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_2.PNG
 6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
 .. image:: https://github.com/jacobbieker/SU2C_pancreatic_cancer/Doc_images/Aperio_Docs_Shot_3.png
 
