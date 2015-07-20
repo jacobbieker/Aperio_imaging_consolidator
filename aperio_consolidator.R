@@ -126,13 +126,12 @@ mouse.ids <- c();
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   read in file content
-master.content <- read_excel(path="master.xlsx",
-                             sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
-                             col_names=TRUE);
-print(master.content$Genotype)
-
+master.workbook <- loadWorkbook("master.xlsx")
+master.content <- readWorksheet(master.workbook, sheet = 1)
+print(master.content)
 # Get vector of genotypes in numerical order to apply later
 master.genotype <- master.content$Genotype
+print(length(master.genotype))
 
 
 #-------------------------------------------------------------------------
@@ -148,9 +147,8 @@ for(i in 1:length(files))   {
   file.name <- files[i];
   
   #   read in file content
-  file.content <- read_excel(path=file.name,
-                             sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
-                             col_names=TRUE);
+  file.workbook <- loadWorkbook(file.name);
+  file.content <- readWorksheet(file.workbook, sheet = 1);
   
   #   extract column headings, for output (and possibly QC), for the first file only
   if(i == 1)
@@ -161,6 +159,7 @@ for(i in 1:length(files))   {
   slide.number <- get.slide.num(file.name);
   stain.number <- get.stain.name(file.name);
   mouse.group <-  which(as.numeric(mouse.idnum) %in% master.genotype)
+  print(mouse.group)
   #Adds stain number to stain.names if it does not already exist in the vector
   if(!stain.number %in% stain.names) {
     stain.names <- c(stain.names, stain.number);
