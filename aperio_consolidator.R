@@ -230,6 +230,9 @@ colnames(output) <- predefined.column.headers;
 #Convert to numeric
 mouse.ids <- as.numeric(mouse.ids);
 
+#Order the output by the Group
+output <- output[with(output, order(Group)),]
+
 #  get the current sheets in the master workbook, which is in the same order
 #  as stain.number
 currentSheets <- getSheets(workbook);
@@ -238,7 +241,7 @@ for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
   output.subset <- output[output[,2]==stain.names[i],]
   #Drops the Stain number from the data.frame before writing it
-  output.subset[,1] <- NULL
+  output.subset[,2] <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
