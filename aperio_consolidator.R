@@ -324,7 +324,7 @@ for(i in 1:length(stain.names)) {
   stain.name <- paste0("Stain ", as.character(stain.names[i]));
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Group", "Mouse ID", stain.name);
+    summary.col.names <- c("Mouse ID", stain.name);
   } else {
     # Very hack-y method at the moment
     summary.col.names <- c(summary.col.names, "NA", "NA", stain.name);
@@ -358,12 +358,22 @@ for(i in 1:length(stain.names)) {
   index <- index + 3
 }
 
-
-
 #Apply column names to the summary output
 colnames(mouse.summary.output) <- summary.col.names
 
-writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4)
+writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4, startCol = 2)
+
+# Add groups to summary sheet, adding it to mouse.summary.output changed all numerics to characters
+group.names <- data.frame();
+mice.ids <- mouse.summary.output$`Mouse ID`
+for(i in 1:length(mice.ids)) {
+  current.data <- subset(output, output[,3]==mice.ids[i])
+  current.data.row <- head(current.data, 1)
+  print(as.character(current.data.row$Group))
+  group.names <- rbind(group.names, as.character(current.data.row$Group))
+  print(group.names)
+}
+
 
 #Save to workbook after creating the summary
 saveWorkbook(workbook)
