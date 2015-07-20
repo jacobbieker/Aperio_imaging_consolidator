@@ -145,6 +145,7 @@ for(i in 1:length(files))   {
   
   #   get current file name
   file.name <- files[i];
+  print(file.name)
   
   #   read in file content
   file.workbook <- loadWorkbook(file.name);
@@ -158,7 +159,10 @@ for(i in 1:length(files))   {
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
   stain.number <- get.stain.name(file.name);
-  mouse.group <-  which(as.numeric(mouse.idnum) %in% master.genotype)
+  print(mouse.idnum)
+  print(as.numeric(mouse.idnum))
+  print(master.genotype)
+  mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
   print(mouse.group)
   #Adds stain number to stain.names if it does not already exist in the vector
   if(!stain.number %in% stain.names) {
@@ -197,6 +201,7 @@ print(output)
 #Then add back in to data.frame 
 factor_to_numbers <- output
 factor_to_numbers$'Stain' <- NULL
+factor_to_numbers$'Group' <- NULL
 
 #   convert factors to numbers
 #       Not elegant, but needed so that the first three columns are converted
@@ -209,10 +214,11 @@ factor_to_numbers<- sapply(factor_to_numbers, function(x) if(is.factor(x)) {
 
 factor_to_numbers <- data.frame(factor_to_numbers)
 #Reassign stain back to the temp data.frame
+factor_to_numbers$'Group' <- output$'Group'
 factor_to_numbers$'Stain' <- output$'Stain'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
-#Reorder so that Stain is the first column, like it was originally
+#Reorder so that Stain and Group are the first two columns, like it was originally
 output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
 print(output)
 
