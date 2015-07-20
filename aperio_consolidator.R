@@ -160,10 +160,12 @@ for(i in 1:length(files))   {
   slide.number <- get.slide.num(file.name);
   stain.number <- get.stain.name(file.name);
   print(mouse.idnum)
-  print(as.numeric(mouse.idnum))
-  print(master.genotype)
+  #Convert to numeric right after getting number
+  mouse.idnum <- as.numeric(mouse.idnum)
+  print(slide.number)
+  slide.number <- as.numeric(slide.number)
+  print(slide.number)
   mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
-  print(mouse.group)
   #Adds stain number to stain.names if it does not already exist in the vector
   if(!stain.number %in% stain.names) {
     stain.names <- c(stain.names, stain.number);
@@ -214,12 +216,12 @@ factor_to_numbers<- sapply(factor_to_numbers, function(x) if(is.factor(x)) {
 
 factor_to_numbers <- data.frame(factor_to_numbers)
 #Reassign stain back to the temp data.frame
-factor_to_numbers$'Group' <- output$'Group'
 factor_to_numbers$'Stain' <- output$'Stain'
+factor_to_numbers$'Group' <- output$'Group'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
 #Reorder so that Stain and Group are the first two columns, like it was originally
-output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
+output <- output[c(length(output), length(output) - 1, seq(1, length(output) - 2, by = 1))]
 print(output)
 
 #Reassign column names lost in above step
