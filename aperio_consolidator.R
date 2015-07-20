@@ -8,8 +8,10 @@
 #
 # Assumptions:
 #   1.  script is located in same directory as input files
-#   2.  directory containing input files contains only this script, plus .xls files to be consolidated
-#   3.  input .xls files follow this naming convention:
+#   2.  directory containing input files contains only this script, the master.xlsx file
+#       plus .xls files to be consolidated
+#   3.  Master file has the groups of the mice in numerical order
+#   4.  input .xls files follow this naming convention:
 #
 #             mouse_NN_slide_MM_stain_MM.xls
 #
@@ -103,6 +105,12 @@ if(file.exists(fn))
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls$");
 
+# remove master file with groups from list of files vector
+files <- setdiff(files, "master.xls");
+
+#   load master workbook so that know which groups Mice are in
+masterwkbk <- loadWorkbook("master.xlsx", create = FALSE)
+
 #   create list to hold output data.frames
 output <- list();
 #   create vector for storing the different stain numbers so that diff sheets created
@@ -111,6 +119,22 @@ stain.names <- c();
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
 mouse.ids <- c();
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#  Get data from master file
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#   read in file content
+master.content <- read_excel(path="master.xlsx",
+                             sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
+                             col_names=TRUE);
+print(master.content$Genotype)
+
+# Get vector of genotypes in numerical order to apply later
+master.genotype <- master.content$Genotype
+
+
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Read workbook contents into R
@@ -135,13 +159,13 @@ for(i in 1:length(files))   {
   #   extract relevant metadata from file name
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
-  stain.nameber <- get.stain.name(file.name);
-  
+  stain.number <- get.stain.name(file.name);
+  mouse.group <-  which(as.numeric(mouse.idnum) %in% master.genotype)
   #Adds stain number to stain.names if it does not already exist in the vector
-  if(!stain.nameber %in% stain.names) {
-    stain.names <- c(stain.names, stain.nameber);
+  if(!stain.number %in% stain.names) {
+    stain.names <- c(stain.names, stain.number);
     #  Create a sheet in the master workbook for each stain
-    createSheet(workbook, name = stain.nameber);
+    createSheet(workbook, name = stain.number);
   }
   
   #Adds stain number to stain.names if it does not already exist in the vector
@@ -150,7 +174,7 @@ for(i in 1:length(files))   {
   }
   
   #   prepend metadata to file content
-  file.content <- cbind(stain.nameber,mouse.idnum, slide.number, file.content);
+  file.content <- cbind(mouse.group, stain.number,mouse.idnum, slide.number, file.content);
   
   #   append file content to output data.frame
   output <- rbind(output, file.content);
@@ -168,6 +192,7 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
+print(output)
 
 #Subset output so that Stain Num are not converted and stay strings
 #Then add back in to data.frame 
@@ -188,9 +213,9 @@ factor_to_numbers <- data.frame(factor_to_numbers)
 factor_to_numbers$'Stain' <- output$'Stain'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
-
 #Reorder so that Stain is the first column, like it was originally
 output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
+print(output)
 
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
@@ -199,7 +224,7 @@ colnames(output) <- predefined.column.headers;
 mouse.ids <- as.numeric(mouse.ids);
 
 #  get the current sheets in the master workbook, which is in the same order
-#  as stain.nameber
+#  as stain.number
 currentSheets <- getSheets(workbook);
 
 for(i in 1:length(currentSheets)) {
