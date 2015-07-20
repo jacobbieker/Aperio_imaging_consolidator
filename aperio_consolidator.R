@@ -33,17 +33,16 @@
 # options(java.parameters = "-Xmx1024m")
 
 # Check if libraries are installed, if not, install them
-if(require("XLConnect") & require("yaml") & require("readxl")){
-  print("XLConnect, yaml, and readxl are loaded correctly")
+if(require("XLConnect") & require("yaml")){
+  print("XLConnect, yaml are loaded correctly")
 } else {
-  print("trying to install XLConnect, yaml, and readxl")
+  print("trying to install XLConnect, yaml")
   install.packages("XLConnect")
   install.packages("yaml")
-  install.packages("readxl")
-  if(require("XLConnect") & require("yaml") & require("readxl")){
-    print("XLConnect, yaml, and readxl are installed and loaded")
+  if(require("XLConnect") & require("yaml")){
+    print("XLConnect, yaml are installed and loaded")
   } else {
-    stop("could not install XLConnect, yaml, or readxl")
+    stop("could not install XLConnect, yaml")
   }
 }
 
@@ -162,9 +161,7 @@ for(i in 1:length(files))   {
   print(mouse.idnum)
   #Convert to numeric right after getting number
   mouse.idnum <- as.numeric(mouse.idnum)
-  print(slide.number)
   slide.number <- as.numeric(slide.number)
-  print(slide.number)
   mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
   #Adds stain number to stain.names if it does not already exist in the vector
   if(!stain.number %in% stain.names) {
@@ -274,18 +271,18 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- c(current.summary, mouse.ids[i])
   for(j in 1:length(stain.names)) {
     #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.names[j])
+    mouse.data.current <- subset(output, output[,3]==mouse.ids[i] & output[,2]==stain.names[j])
     #Perform the calculations
     #   Averaging to get the number of cells per mm per stain and mouse
-    average.size <- mean(mouse.data.current[,25]);
+    average.size <- mean(mouse.data.current[,26]);
     #   First 3+ 2+ and 1+ average
-    average.cells321 <- mean(mouse.data.current[,16]+mouse.data.current[,17]+mouse.data.current[,18]);
+    average.cells321 <- mean(mouse.data.current[,17]+mouse.data.current[,18]+mouse.data.current[,19]);
     average.321cellpermm <- average.cells321/average.size;
     #   Then 3+ 2+ average
-    average.cells32 <- mean(mouse.data.current[,16]+mouse.data.current[,17]);
+    average.cells32 <- mean(mouse.data.current[,17]+mouse.data.current[,18]);
     average.32cellpermm <- average.cells32/average.size;
     #   Last 3+ average
-    average.cells3 <- mean(mouse.data.current[,16]);
+    average.cells3 <- mean(mouse.data.current[,17]);
     average.3cellpermm <- average.cells3/average.size;
     #Append average cell to current summary
     current.summary <- c(current.summary, average.321cellpermm, average.32cellpermm, average.3cellpermm);
