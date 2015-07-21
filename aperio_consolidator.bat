@@ -50,8 +50,10 @@ exit /b
 #
 # Assumptions:
 #   1.  script is located in same directory as input files
-#   2.  directory containing input files contains only this script, plus .xls files to be consolidated
-#   3.  input .xls files follow this naming convention:
+#   2.  directory containing input files contains only this script, the master.xlsx file
+#       plus .xls files to be consolidated
+#   3.  Master file has the groups of the mice in numerical order
+#   4.  input .xls files follow this naming convention:
 #
 #             mouse_NN_slide_MM_stain_MM.xls
 #
@@ -73,17 +75,16 @@ exit /b
 # options(java.parameters = "-Xmx1024m")
 
 # Check if libraries are installed, if not, install them
-if(require("XLConnect") & require("yaml") & require("readxl")){
-  print("XLConnect, yaml, and readxl are loaded correctly")
+if(require("XLConnect") & require("yaml")){
+  print("XLConnect, yaml are loaded correctly")
 } else {
-  print("trying to install XLConnect, yaml, and readxl")
+  print("trying to install XLConnect, yaml")
   install.packages("XLConnect")
   install.packages("yaml")
-  install.packages("readxl")
-  if(require("XLConnect") & require("yaml") & require("readxl")){
-    print("XLConnect, yaml, and readxl are installed and loaded")
+  if(require("XLConnect") & require("yaml")){
+    print("XLConnect, yaml are installed and loaded")
   } else {
-    stop("could not install XLConnect, yaml, or readxl")
+    stop("could not install XLConnect, yaml")
   }
 }
 
@@ -145,6 +146,12 @@ if(file.exists(fn))
 #   identify all .xls files in the directory 
 files <- list.files(getwd(), pattern = ".xls$");
 
+# remove master file with groups from list of files vector
+files <- setdiff(files, "master.xls");
+
+#   load master workbook so that know which groups Mice are in
+masterwkbk <- loadWorkbook("master.xlsx", create = FALSE)
+
 #   create list to hold output data.frames
 output <- list();
 #   create vector for storing the different stain numbers so that diff sheets created
@@ -153,6 +160,19 @@ stain.names <- c();
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
 mouse.ids <- c();
+
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#  Get data from master file
+#-------------------------------------------------------------------------
+#-------------------------------------------------------------------------
+#   read in file content
+master.workbook <- loadWorkbook("master.xlsx")
+master.content <- readWorksheet(master.workbook, sheet = 1)
+# Get vector of genotypes in numerical order to apply later
+master.genotype <- master.content$Genotype
+
+
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Read workbook contents into R
@@ -166,9 +186,8 @@ for(i in 1:length(files))   {
   file.name <- files[i];
   
   #   read in file content
-  file.content <- read_excel(path=file.name,
-                             sheet=1,     #   Workbook output by ImageScope always contains only one worksheet
-                             col_names=TRUE);
+  file.workbook <- loadWorkbook(file.name);
+  file.content <- readWorksheet(file.workbook, sheet = 1);
   
   #   extract column headings, for output (and possibly QC), for the first file only
   if(i == 1)
@@ -177,13 +196,16 @@ for(i in 1:length(files))   {
   #   extract relevant metadata from file name
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
-  stain.nameber <- get.stain.name(file.name);
-  
+  stain.number <- get.stain.name(file.name);
+  #Convert to numeric right after getting number
+  mouse.idnum <- as.numeric(mouse.idnum)
+  slide.number <- as.numeric(slide.number)
+  mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
   #Adds stain number to stain.names if it does not already exist in the vector
-  if(!stain.nameber %in% stain.names) {
-    stain.names <- c(stain.names, stain.nameber);
+  if(!stain.number %in% stain.names) {
+    stain.names <- c(stain.names, stain.number);
     #  Create a sheet in the master workbook for each stain
-    createSheet(workbook, name = stain.nameber);
+    createSheet(workbook, name = stain.number);
   }
   
   #Adds stain number to stain.names if it does not already exist in the vector
@@ -192,7 +214,7 @@ for(i in 1:length(files))   {
   }
   
   #   prepend metadata to file content
-  file.content <- cbind(stain.nameber,mouse.idnum, slide.number, file.content);
+  file.content <- cbind(mouse.group, stain.number,mouse.idnum, slide.number, file.content);
   
   #   append file content to output data.frame
   output <- rbind(output, file.content);
@@ -210,11 +232,11 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
-
 #Subset output so that Stain Num are not converted and stay strings
 #Then add back in to data.frame 
 factor_to_numbers <- output
 factor_to_numbers$'Stain' <- NULL
+factor_to_numbers$'Group' <- NULL
 
 #   convert factors to numbers
 #       Not elegant, but needed so that the first three columns are converted
@@ -228,11 +250,11 @@ factor_to_numbers<- sapply(factor_to_numbers, function(x) if(is.factor(x)) {
 factor_to_numbers <- data.frame(factor_to_numbers)
 #Reassign stain back to the temp data.frame
 factor_to_numbers$'Stain' <- output$'Stain'
+factor_to_numbers$'Group' <- output$'Group'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
-
-#Reorder so that Stain is the first column, like it was originally
-output <- output[c(length(output), seq(1, length(output) - 1, by = 1))]
+#Reorder so that Stain and Group are the first two columns, like it was originally
+output <- output[c(length(output), length(output) - 1, seq(1, length(output) - 2, by = 1))]
 
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
@@ -240,15 +262,18 @@ colnames(output) <- predefined.column.headers;
 #Convert to numeric
 mouse.ids <- as.numeric(mouse.ids);
 
+#Order the output by the Group
+output <- output[with(output, order(Group)),]
+
 #  get the current sheets in the master workbook, which is in the same order
-#  as stain.nameber
+#  as stain.number
 currentSheets <- getSheets(workbook);
 
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same stain number
-  output.subset <- output[output[,1]==stain.names[i],]
+  output.subset <- output[output[,2]==stain.names[i],]
   #Drops the Stain number from the data.frame before writing it
-  output.subset[,1] <- NULL
+  output.subset[,2] <- NULL
   #Get rid of stain number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
@@ -281,18 +306,18 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- c(current.summary, mouse.ids[i])
   for(j in 1:length(stain.names)) {
     #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output[,2]==mouse.ids[i] & output[,1]==stain.names[j])
+    mouse.data.current <- subset(output, output[,3]==mouse.ids[i] & output[,2]==stain.names[j])
     #Perform the calculations
     #   Averaging to get the number of cells per mm per stain and mouse
-    average.size <- mean(mouse.data.current[,25]);
+    average.size <- mean(mouse.data.current[,26]);
     #   First 3+ 2+ and 1+ average
-    average.cells321 <- mean(mouse.data.current[,16]+mouse.data.current[,17]+mouse.data.current[,18]);
+    average.cells321 <- mean(mouse.data.current[,17]+mouse.data.current[,18]+mouse.data.current[,19]);
     average.321cellpermm <- average.cells321/average.size;
     #   Then 3+ 2+ average
-    average.cells32 <- mean(mouse.data.current[,16]+mouse.data.current[,17]);
+    average.cells32 <- mean(mouse.data.current[,17]+mouse.data.current[,18]);
     average.32cellpermm <- average.cells32/average.size;
     #   Last 3+ average
-    average.cells3 <- mean(mouse.data.current[,16]);
+    average.cells3 <- mean(mouse.data.current[,17]);
     average.3cellpermm <- average.cells3/average.size;
     #Append average cell to current summary
     current.summary <- c(current.summary, average.321cellpermm, average.32cellpermm, average.3cellpermm);
@@ -334,7 +359,7 @@ for(i in 1:length(stain.names)) {
   stain.name <- paste0("Stain ", as.character(stain.names[i]));
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Group", "Mouse ID", stain.name);
+    summary.col.names <- c("Mouse ID", stain.name);
   } else {
     # Very hack-y method at the moment
     summary.col.names <- c(summary.col.names, "NA", "NA", stain.name);
@@ -359,7 +384,6 @@ for(i in 1:length(stain.names)) {
     mergeCells(workbook, sheet = "summary", "C4:E4")
   } else {
   reference <- paste0(LETTERS[index+3],"4:", LETTERS[index+5], "4")
-  print(reference)
   mergeCells(workbook, sheet = "summary", reference)
 }
   #Write to the worksheet
@@ -368,12 +392,27 @@ for(i in 1:length(stain.names)) {
   index <- index + 3
 }
 
-
-
 #Apply column names to the summary output
 colnames(mouse.summary.output) <- summary.col.names
 
-writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4)
+writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4, startCol = 2)
 
+# Add groups to summary sheet, adding it to mouse.summary.output changed all numerics to characters
+group.names <- c();
+mice.ids <- mouse.summary.output$`Mouse ID`
+for(i in 1:length(mice.ids)) {
+  current.data <- subset(output, output[,3]==mice.ids[i])
+  current.data.row <- head(current.data, 1)
+  # Taken from: https://stackoverflow.com/questions/24447877/invalid-factor-level-na-generated-when-pasting-in-a-dataframe-in-r
+  current.data.row[,c(1)] <- sapply(current.data.row[,c(1)],as.character) 
+  #Adds name to the vector
+  group.names <- c(group.names, current.data.row$Group)
+}
+#Converts to data.frame starting with data.frame resulted in NA errors
+group.names <- as.data.frame(group.names)
+
+colnames(group.names) <- "Group"
+
+writeWorksheet(workbook, group.names, sheet = "summary", startRow = 4)
 #Save to workbook after creating the summary
 saveWorkbook(workbook)
