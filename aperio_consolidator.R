@@ -127,10 +127,8 @@ mouse.ids <- c();
 #   read in file content
 master.workbook <- loadWorkbook("master.xlsx")
 master.content <- readWorksheet(master.workbook, sheet = 1)
-print(master.content)
 # Get vector of genotypes in numerical order to apply later
 master.genotype <- master.content$Genotype
-print(length(master.genotype))
 
 
 #-------------------------------------------------------------------------
@@ -144,7 +142,6 @@ for(i in 1:length(files))   {
   
   #   get current file name
   file.name <- files[i];
-  print(file.name)
   
   #   read in file content
   file.workbook <- loadWorkbook(file.name);
@@ -158,7 +155,6 @@ for(i in 1:length(files))   {
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
   stain.number <- get.stain.name(file.name);
-  print(mouse.idnum)
   #Convert to numeric right after getting number
   mouse.idnum <- as.numeric(mouse.idnum)
   slide.number <- as.numeric(slide.number)
@@ -194,8 +190,6 @@ for(i in 1:length(files))   {
 #Assign the column names to the data.frame
 colnames(output) <- predefined.column.headers;
 
-print(output)
-
 #Subset output so that Stain Num are not converted and stay strings
 #Then add back in to data.frame 
 factor_to_numbers <- output
@@ -219,7 +213,6 @@ factor_to_numbers$'Group' <- output$'Group'
 output <- factor_to_numbers
 #Reorder so that Stain and Group are the first two columns, like it was originally
 output <- output[c(length(output), length(output) - 1, seq(1, length(output) - 2, by = 1))]
-print(output)
 
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
@@ -349,7 +342,6 @@ for(i in 1:length(stain.names)) {
     mergeCells(workbook, sheet = "summary", "C4:E4")
   } else {
   reference <- paste0(LETTERS[index+3],"4:", LETTERS[index+5], "4")
-  print(reference)
   mergeCells(workbook, sheet = "summary", reference)
 }
   #Write to the worksheet
@@ -364,16 +356,21 @@ colnames(mouse.summary.output) <- summary.col.names
 writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4, startCol = 2)
 
 # Add groups to summary sheet, adding it to mouse.summary.output changed all numerics to characters
-group.names <- data.frame();
+group.names <- c();
 mice.ids <- mouse.summary.output$`Mouse ID`
 for(i in 1:length(mice.ids)) {
   current.data <- subset(output, output[,3]==mice.ids[i])
   current.data.row <- head(current.data, 1)
-  print(as.character(current.data.row$Group))
-  group.names <- rbind(group.names, as.character(current.data.row$Group))
-  print(group.names)
+  # Taken from: https://stackoverflow.com/questions/24447877/invalid-factor-level-na-generated-when-pasting-in-a-dataframe-in-r
+  current.data.row[,c(1)] <- sapply(current.data.row[,c(1)],as.character) 
+  #Adds name to the vector
+  group.names <- c(group.names, current.data.row$Group)
 }
+#Converts to data.frame starting with data.frame resulted in NA errors
+group.names <- as.data.frame(group.names)
 
+colnames(group.names) <- "Group"
 
+writeWorksheet(workbook, group.names, sheet = "summary", startRow = 4)
 #Save to workbook after creating the summary
 saveWorkbook(workbook)
