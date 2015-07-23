@@ -7,11 +7,12 @@
 #   Output is a single .xlsx worksheet
 #
 # Assumptions:
-#   1.  script is located in same directory as input files
-#   2.  directory containing input files contains only this script, the master.xlsx file
+#   1.  Perl is installed on the system
+#   2.  script is located in same directory as input files
+#   3.  directory containing input files contains only this script, the master.xlsx file
 #       plus .xls files to be consolidated
-#   3.  Master file has the groups of the mice in numerical order
-#   4.  input .xls files follow this naming convention:
+#   4.  Master file has the groups of the mice in numerical order
+#   5.  input .xls files follow this naming convention:
 #
 #             mouse_NN_slide_MM_stain_MM.xls
 #
@@ -33,7 +34,7 @@
 # options(java.parameters = "-Xmx1024m")
 
 # Check if libraries are installed, if not, install them
-if(require("XLConnect") & require("yaml")){
+if(require("XLConnect") & require("yaml") & require("gdata")){
   print("XLConnect, yaml are loaded correctly")
 } else {
   print("trying to install XLConnect, yaml")
@@ -50,6 +51,9 @@ if(require("XLConnect") & require("yaml")){
 library(readxl);
 library(XLConnect);
 library(yaml);
+library(gdata);
+#Set the Perl location so that gdata can read it
+perl <- "C:/strawberry/perl/bin/perl.exe"
 
 #loads column names from config file config.yml
 predefined.column.headers <- yaml.load_file("config.yml");
@@ -144,8 +148,7 @@ for(i in 1:length(files))   {
   file.name <- files[i];
   
   #   read in file content
-  file.workbook <- loadWorkbook(file.name);
-  file.content <- readWorksheet(file.workbook, sheet = 1);
+  file.content = read.xls(file.name, perl = perl)
   
   #   extract column headings, for output (and possibly QC), for the first file only
   if(i == 1)
