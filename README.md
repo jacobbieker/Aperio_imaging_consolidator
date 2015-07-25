@@ -28,7 +28,7 @@
 #   HOW TO USE
 There are a few ways to use this script. 
 
-Pre-requisites: R 3.1.0 or higher is installed on the computer being used
+Pre-requisites: R 3.1.0 or higher is installed on the computer being used, along with Perl 2.10.0 or higher
                 Internet connection to install required libraries if they are not already installed
 
 For Windows users: 
@@ -36,12 +36,13 @@ For Windows users:
 1. Download config.yml and aperio_consolidator.bat to your computer. 
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
-3. Place config and aperio_consolidator in the same folder as in the previous step
+3. Set the Perl location in config.yaml to the path to perl.exe
+4. Place config and aperio_consolidator in the same folder as in the previous step
 ![Screenshot](/Doc_images/Aperio_Docs_Shot_1.PNG?token=AG1pN3f-rvsUCmKCnwPYqoiNE0rIdjHjks5VrpaHwA%3D%3D)
-4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
-5. Double click on aperio_consolidator.bat to run the program
+5. If necessary, change the names of the columns in config.yml by opening it up in a text editor
+6. Double click on aperio_consolidator.bat to run the program
 ![Screenshot](/Doc_images/Aperio_Docs_Shot_2.PNG?token=AG1pNxlT7NWzM8xUqpzf2fYxQW-Lxt1Uks5VrpbFwA%3D%3D)
-6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
+7. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
 ![Screenshot](/Doc_images/Aperio_Docs_Shot_3.PNG?token=AG1pNzhYwTZkB68-6ZWCcYn3rnEW2quJks5Vrpb9wA%3D%3D)
 
 
@@ -50,10 +51,11 @@ For Mac OSX/Linux users:
 1. Download config.yml and aperio_consolidator.sh to your computer. 
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
-3. Place config and aperio_consolidator in the same folder as in the previous step
-4. If necessary, change the names of the columns in config.yml by opening it up in a text editor
-5. Double click on aperio_consolidator.sh to run the program
-6. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
+3. Set the Perl location in config.yaml to the path to the perl executable
+4. Place config and aperio_consolidator in the same folder as in the previous step
+5. If necessary, change the names of the columns in config.yml by opening it up in a text editor
+6. Double click on aperio_consolidator.sh to run the program
+7. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
 
 
 # Testing
