@@ -10,11 +10,12 @@
   #   Output is a single .xlsx worksheet
   #
   # Assumptions:
-  #   1.  script is located in same directory as input files
-  #   2.  directory containing input files contains only this script, the master.xlsx file
+  #   1.  Perl is installed on the system
+  #   2.  script is located in same directory as input files
+  #   3.  directory containing input files contains only this script, the master.xlsx file
   #       plus .xls files to be consolidated
-  #   3.  Master file has the groups of the mice in numerical order
-  #   4.  input .xls files follow this naming convention:
+  #   4.  Master file has the groups of the mice in numerical order
+  #   5.  input .xls files follow this naming convention:
   #
   #             mouse_NN_slide_MM_stain_MM.xls
   #
@@ -36,7 +37,7 @@
   # options(java.parameters = "-Xmx1024m")
   
   # Check if libraries are installed, if not, install them
-  if(require("XLConnect") & require("yaml")){
+  if(require("XLConnect") & require("yaml") & require("gdata")){
     print("XLConnect, yaml are loaded correctly")
   } else {
     print("trying to install XLConnect, yaml")
@@ -53,6 +54,9 @@
   library(readxl);
   library(XLConnect);
   library(yaml);
+  library(gdata);
+  #Set the Perl location so that gdata can read it
+  perl <- "#!/usr/bin/perl"
   
   #loads column names from config file config.yml
   predefined.column.headers <- yaml.load_file("config.yml");
@@ -147,8 +151,7 @@
     file.name <- files[i];
     
     #   read in file content
-    file.workbook <- loadWorkbook(file.name);
-    file.content <- readWorksheet(file.workbook, sheet = 1);
+    file.content = read.xls(file.name, perl = perl)
     
     #   extract column headings, for output (and possibly QC), for the first file only
     if(i == 1)
@@ -348,7 +351,7 @@
     mergeCells(workbook, sheet = "summary", reference)
   }
     #Write to the worksheet
-    writeWorksheet(workbook, stain.name, sheet = "summary", 4, 2, header = FALSE)
+    writeWorksheet(workbook, stain.name, sheet = "summary", 6, 2, header = FALSE)
     #up index by three since each stain takes up three columns
     index <- index + 3
   }
@@ -356,7 +359,8 @@
   #Apply column names to the summary output
   colnames(mouse.summary.output) <- summary.col.names
   
-  writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 4, startCol = 2)
+  #Write to file, not include headers so that extra line can be included
+  writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 6, startCol = 2, header = FALSE)
   
   # Add groups to summary sheet, adding it to mouse.summary.output changed all numerics to characters
   group.names <- c();
@@ -372,9 +376,53 @@
   #Converts to data.frame starting with data.frame resulted in NA errors
   group.names <- as.data.frame(group.names)
   
+  #Add the proper header for the data.frame if wanted to use later
   colnames(group.names) <- "Group"
   
-  writeWorksheet(workbook, group.names, sheet = "summary", startRow = 4)
+  #Write to worksheet, again not including the header
+  writeWorksheet(workbook, group.names, sheet = "summary", startRow = 6, header = FALSE)
+  
+  #--------------------------------------------------------------------------
+  #
+  #     Add in headers for the (3+,2+,1+), etc. and "Mouse ID", etc.
+  #      Kind of a hack-y way, but not sure of how else to have a space between headers
+  #      and data for the (3+,2+,1+), etc. 
+  #
+  #---------------------------------------------------------------------------
+  
+  # Get the headers from summary column names and make into a data.frame
+  #Dummy data so summary.col.names can be made the headers. Will be overwritten later
+  dummy.data <- c();
+  #Add 'Group' to the summary column data names
+  summary.col.names <- c("Group", summary.col.names)
+  #Add enough entries for every sumamry.col.names entry
+  for(i in 1:length(summary.col.names)) {
+    dummy.data <- cbind(dummy.data, NA)
+  }
+  #Convert to data.frame and apply the column names to the datafram
+  dummy.data <- as.data.frame(dummy.data)
+  colnames(dummy.data) <- summary.col.names
+  #Write the data frame
+  writeWorksheet(workbook, dummy.data, sheet = "summary", startRow = 4)
+  
+  # Now add the information below the different stains
+  
+  #Empty places for the first two spots, for Groups and Mouse ID
+  aperio.labels <- c(NA, NA)
+  print(aperio.labels)
+  #Now add the three labels for each stain
+  for( i in 1:length(stain.names)) {
+    aperio.labels <- cbind(aperio.labels, "(3+, 2+, 1+)", "(3+, 2+)", "(3+)")
+    print(aperio.labels)
+  }
+  #Convert to data.frame to XLConnect can write it 
+  aperio.labels <- as.data.frame(aperio.labels, stringsAsFactors=FALSE)
+  
+  #Only choose the first line, as other wise there is a row for each NA
+  aperio.labels <- head(aperio.labels, 1)
+  #Write to file
+  writeWorksheet(workbook, aperio.labels, sheet = "summary", startRow = 5, startCol = 2, header = FALSE)
+  
   #Save to workbook after creating the summary
   saveWorkbook(workbook)
   ###########################end of R code #########################
