@@ -43,6 +43,7 @@
     print("trying to install XLConnect, yaml")
     install.packages("XLConnect")
     install.packages("yaml")
+    install.packages("gdata")
     if(require("XLConnect") & require("yaml")){
       print("XLConnect, yaml are installed and loaded")
     } else {
