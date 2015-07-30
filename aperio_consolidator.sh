@@ -1,4 +1,4 @@
-#!/bin/bash
+#! usr/bin/env bash
   R --vanilla << "EOF"      #  Pipe all subsequent lines into R.
   ################ Put all your R code here  ###############
     
@@ -56,7 +56,7 @@
   library(yaml);
   library(gdata);
   #Set the Perl location so that gdata can read it
-  perl <- "#!/usr/bin/perl"
+  perl <- "/usr/bin/perl"
   
   #loads column names from config file config.yml
   predefined.column.headers <- yaml.load_file("config.yml");
