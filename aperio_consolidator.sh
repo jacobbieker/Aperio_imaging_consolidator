@@ -1,4 +1,4 @@
-#! usr/bin/env bash
+#!/bin/bash
   R --vanilla << "EOF"      #  Pipe all subsequent lines into R.
   ################ Put all your R code here  ###############
     
