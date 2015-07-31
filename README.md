@@ -36,7 +36,7 @@ For Windows users:
 1. Download config.yml and aperio_consolidator.bat to your computer. 
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
-3. Set the Perl location in config.yaml to the path to perl.exe
+3. Set the Perl location in the SETUP section of aperio_consolidator.bat to the path to perl.exe, default is 'C:/strawberry/perl/bin/perl.exe', the default install directory for strawberry Perl
 4. Place config and aperio_consolidator in the same folder as in the previous step
 ![Screenshot](/Doc_images/Aperio_Docs_Shot_1.PNG?token=AG1pN3f-rvsUCmKCnwPYqoiNE0rIdjHjks5VrpaHwA%3D%3D)
 5. If necessary, change the names of the columns in config.yml by opening it up in a text editor
@@ -51,7 +51,7 @@ For Mac OSX/Linux users:
 1. Download config.yml and aperio_consolidator.sh to your computer. 
 2. Move all the .xls files from Aperio into one folder, renamed to follow the
 above format
-3. Set the Perl location in config.yaml to the path to the perl executable
+3. Set the Perl location in SETUP section of aperio_consolidator.sh to the path to the perl executable, default is 'usr/bin/perl'
 4. Place config and aperio_consolidator in the same folder as in the previous step
 5. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 6. Double click on aperio_consolidator.sh to run the program
