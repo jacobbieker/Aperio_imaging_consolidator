@@ -44,15 +44,10 @@ if(require("XLConnect") & require("yaml") & require("gdata")){
   if(require("XLConnect") & require("yaml")){
     print("XLConnect, yaml are installed and loaded")
   } else {
-    stop("could not install XLConnect, yaml")
+    stop("could not install XLConnect, yaml, gdata")
   }
 }
 
-#   load appropriate libraries
-library(readxl);
-library(XLConnect);
-library(yaml);
-library(gdata);
 #Set the Perl location so that gdata can read it
 perl <- "C:/strawberry/perl/bin/perl.exe"
 
