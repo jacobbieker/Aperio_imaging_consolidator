@@ -1,0 +1,5 @@
+tell application "R"
+   activate
+      cmd "setwd('<PATH TO FOLDER')"
+      cmd "source('<PATH TO R SCRIPT>')"
+end tell
