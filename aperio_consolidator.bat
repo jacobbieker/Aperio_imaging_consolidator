@@ -56,11 +56,11 @@ exit /b
 #   4.  Master file has the groups of the mice in numerical order
 #   5.  input .xls files follow this naming convention:
 #
-#             mouse_NN_slide_MM_stain_MM.xls
+#             mouse_NN_slide_MM_sid_MM.xls
 #
-#       so for mouse 3, slide 2, stain 5, the file name should be:
+#       so for mouse 3, slide 2, sid 5, the file name should be:
 #
-#             mouse_3_slide_2_stain_5.xls
+#             mouse_3_slide_2_sid_5.xls
 #
 #       Note that the delimitator between each component of the file name can be 
 #       any of the following: "_"
@@ -82,18 +82,14 @@ if(require("XLConnect") & require("yaml") & require("gdata")){
   print("trying to install XLConnect, yaml")
   install.packages("XLConnect")
   install.packages("yaml")
+  install.packages("gdata")
   if(require("XLConnect") & require("yaml")){
     print("XLConnect, yaml are installed and loaded")
   } else {
-    stop("could not install XLConnect, yaml")
+    stop("could not install XLConnect, yaml, gdata")
   }
 }
 
-#   load appropriate libraries
-library(readxl);
-library(XLConnect);
-library(yaml);
-library(gdata);
 #Set the Perl location so that gdata can read it
 perl <- "C:/strawberry/perl/bin/perl.exe"
 
@@ -106,36 +102,40 @@ predefined.column.headers <- yaml.load_file("config.yml");
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 
-#   utility functions for mouse_MM_slide_NN_stain_NN.xls
+#   utility functions for AG4.5 M1 223316 BrdU.xls
 get.mouse.id <- function(file.name) {
   #   remove file extension
-  file.name <- strsplit(file.name, "\\.")[[1]][1];
+  file.name <- strsplit(file.name, "\\.")[[1]][2];
   #   extract mouse number
-  mouse.id <- strsplit(file.name, "_")[[1]][2];
+  mouse.id.full <- strsplit(file.name, " ")[[1]][2];
+  mouse.id <- strsplit(mouse.id.full, "")[[1]][2];
+  print(mouse.id)
   return(mouse.id);
 }   #   get.mouse.id()
 
 get.slide.num <- function(file.name)   {
   #   remove file extension
-  file.name <- strsplit(file.name, "\\.")[[1]][1];
+  file.name <- strsplit(file.name, "\\.")[[1]][2];
   #   extract mouse number
-  slide.num <- strsplit(file.name, "_")[[1]][4];    
+  slide.num <- strsplit(file.name, " ")[[1]][3];
+  print(slide.num)
   return(slide.num);    
 }   #   get.slide.num()
 
-get.stain.name <- function(file.name)   {
+get.sid.name <- function(file.name)   {
   #   remove file extension
-  file.name <- strsplit(file.name, "\\.")[[1]][1];
-  #   extract stain number
-  stain.name <- strsplit(file.name, "_")[[1]][6];
-  #Checks if stain name does not exist, because the output will be messed up if so
-  if (is.na(stain.name)) {
+  file.name <- strsplit(file.name, "\\.")[[1]][2];
+  #   extract sid number
+  sid.name <- strsplit(file.name, " ")[[1]][4];
+  print(sid.name)
+  #Checks if sid name does not exist, because the output will be messed up if so
+  if (is.na(sid.name)) {
     noStainError <- paste0("Warning: File ", file.name, " does not conform to the naming convention
                            , please rename file and rerun script")
     stop(noStainError)
   }
-  return(stain.name);
-}   #   get.stain.name()
+  return(sid.name);
+}   #   get.sid.name()
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
 #   Setup
@@ -158,8 +158,8 @@ masterwkbk <- loadWorkbook("master.xlsx", create = FALSE)
 
 #   create list to hold output data.frames
 output <- list();
-#   create vector for storing the different stain numbers so that diff sheets created
-stain.names <- c();
+#   create vector for storing the different sid numbers so that diff sheets created
+sid.names <- c();
 #   create workbook to save the data to
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
@@ -199,25 +199,25 @@ for(i in 1:length(files))   {
   #   extract relevant metadata from file name
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
-  stain.number <- get.stain.name(file.name);
+  sid.number <- get.sid.name(file.name);
   #Convert to numeric right after getting number
   mouse.idnum <- as.numeric(mouse.idnum)
   slide.number <- as.numeric(slide.number)
   mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
-  #Adds stain number to stain.names if it does not already exist in the vector
-  if(!stain.number %in% stain.names) {
-    stain.names <- c(stain.names, stain.number);
-    #  Create a sheet in the master workbook for each stain
-    createSheet(workbook, name = stain.number);
+  #Adds sid number to sid.names if it does not already exist in the vector
+  if(!sid.number %in% sid.names) {
+    sid.names <- c(sid.names, sid.number);
+    #  Create a sheet in the master workbook for each sid
+    createSheet(workbook, name = sid.number);
   }
   
-  #Adds stain number to stain.names if it does not already exist in the vector
+  #Adds sid number to sid.names if it does not already exist in the vector
   if(!mouse.idnum %in% mouse.ids) {
     mouse.ids <- c(mouse.ids, mouse.idnum);
   }
   
   #   prepend metadata to file content
-  file.content <- cbind(mouse.group, stain.number,mouse.idnum, slide.number, file.content);
+  file.content <- cbind(mouse.group, sid.number,mouse.idnum, slide.number, file.content);
   
   #   append file content to output data.frame
   output <- rbind(output, file.content);
@@ -238,7 +238,7 @@ colnames(output) <- predefined.column.headers;
 #Subset output so that Stain Num are not converted and stay strings
 #Then add back in to data.frame 
 factor_to_numbers <- output
-factor_to_numbers$'Stain' <- NULL
+factor_to_numbers$'SID' <- NULL
 factor_to_numbers$'Group' <- NULL
 
 #   convert factors to numbers
@@ -251,8 +251,8 @@ factor_to_numbers<- sapply(factor_to_numbers, function(x) if(is.factor(x)) {
 })
 
 factor_to_numbers <- data.frame(factor_to_numbers)
-#Reassign stain back to the temp data.frame
-factor_to_numbers$'Stain' <- output$'Stain'
+#Reassign sid back to the temp data.frame
+factor_to_numbers$'SID' <- output$'SID'
 factor_to_numbers$'Group' <- output$'Group'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
@@ -269,15 +269,15 @@ mouse.ids <- as.numeric(mouse.ids);
 output <- output[with(output, order(Group)),]
 
 #  get the current sheets in the master workbook, which is in the same order
-#  as stain.number
+#  as sid.number
 currentSheets <- getSheets(workbook);
 
 for(i in 1:length(currentSheets)) {
-  # Selects the subset of the output that has the same stain number
-  output.subset <- output[output[,2]==stain.names[i],]
+  # Selects the subset of the output that has the same sid number
+  output.subset <- output[output[,2]==sid.names[i],]
   #Drops the Stain number from the data.frame before writing it
   output.subset[,2] <- NULL
-  #Get rid of stain number on columns, since that is stored in sheet name
+  #Get rid of sid number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
 
@@ -307,11 +307,11 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- NULL;
   #Add the mouse ID to the current.summary
   current.summary <- c(current.summary, mouse.ids[i])
-  for(j in 1:length(stain.names)) {
-    #subset output for current mouse and stain numbers
-    mouse.data.current <- subset(output, output[,3]==mouse.ids[i] & output[,2]==stain.names[j])
+  for(j in 1:length(sid.names)) {
+    #subset output for current mouse and sid numbers
+    mouse.data.current <- subset(output, output[,3]==mouse.ids[i] & output[,2]==sid.names[j])
     #Perform the calculations
-    #   Averaging to get the number of cells per mm per stain and mouse
+    #   Averaging to get the number of cells per mm per sid and mouse
     average.size <- mean(mouse.data.current[,26]);
     #   First 3+ 2+ and 1+ average
     average.cells321 <- mean(mouse.data.current[,17]+mouse.data.current[,18]+mouse.data.current[,19]);
@@ -344,11 +344,11 @@ setFillPattern(average.header, XLC$FILL.SOLID_FOREGROUND)
 setFillForegroundColor(average.header, XLC$COLOR.TURQUOISE)
 #setBorder(average.header, side = "all", XLC$BORDER.MEDIUM, color = XLC$COLOR.BLACK)
 
-#    Create header for above the stain numbers
+#    Create header for above the sid numbers
 #have reference to get correct number of columns
-reference <- paste0("C3:", LETTERS[(3 * length(stain.names))+2], "3")
+reference <- paste0("C3:", LETTERS[(3 * length(sid.names))+2], "3")
 mergeCells(workbook, sheet = "summary", reference)
-mergedCellsIndex <- seq(2, length(stain.names)+1, 1)
+mergedCellsIndex <- seq(2, length(sid.names)+1, 1)
 
 #Write to the worksheet
 writeWorksheet(workbook, "Average Cells/mm Per Stain for (3+, 2+, 1+), (3+, 2+), and (3+)", sheet = "summary", 3, 3, header = FALSE)
@@ -358,31 +358,31 @@ setCellStyle(workbook, sheet = "summary", row = 3, col = mergedCellsIndex+1, cel
 #Create the columns for the data to go in
 summary.col.names <- c();
 
-for(i in 1:length(stain.names)) {
-  stain.name <- paste0("Stain ", as.character(stain.names[i]));
+for(i in 1:length(sid.names)) {
+  sid.name <- paste0("Stain ", as.character(sid.names[i]));
   #put in the initial names
   if(i==1){
-    summary.col.names <- c("Mouse ID", stain.name);
+    summary.col.names <- c("Mouse ID", sid.name);
   } else {
     # Very hack-y method at the moment
-    summary.col.names <- c(summary.col.names, "NA", "NA", stain.name);
+    summary.col.names <- c(summary.col.names, "NA", "NA", sid.name);
   }
 }
 
-# Make stain names span 3 columns so that the different averages can be included below
+# Make sid names span 3 columns so that the different averages can be included below
 #  Create CellStyles to use later
-stain.header <- createCellStyle(workbook, name = "StainHeader")
+sid.header <- createCellStyle(workbook, name = "StainHeader")
 
 #Create the columns for the data to go in
-summary.stain.names <- c();
+summary.sid.names <- c();
 #Index to track where to put the next header
 index <- 0
 
-for(i in 1:length(stain.names)) {
-  stain.name <- paste0("Stain ", as.character(stain.names[i]));
-  #    Create header for above the stain numbers
+for(i in 1:length(sid.names)) {
+  sid.name <- paste0("Stain ", as.character(sid.names[i]));
+  #    Create header for above the sid numbers
   #have reference to get correct number of columns
-  # TODO add support for if the stains go into the double letter range
+  # TODO add support for if the sids go into the double letter range
   if (i == 1) {
     mergeCells(workbook, sheet = "summary", "C4:E4")
   } else {
@@ -390,8 +390,8 @@ for(i in 1:length(stain.names)) {
   mergeCells(workbook, sheet = "summary", reference)
 }
   #Write to the worksheet
-  writeWorksheet(workbook, stain.name, sheet = "summary", 6, 2, header = FALSE)
-  #up index by three since each stain takes up three columns
+  writeWorksheet(workbook, sid.name, sheet = "summary", 6, 2, header = FALSE)
+  #up index by three since each sid takes up three columns
   index <- index + 3
 }
 
@@ -444,13 +444,13 @@ colnames(dummy.data) <- summary.col.names
 #Write the data frame
 writeWorksheet(workbook, dummy.data, sheet = "summary", startRow = 4)
 
-# Now add the information below the different stains
+# Now add the information below the different sids
 
 #Empty places for the first two spots, for Groups and Mouse ID
 aperio.labels <- c(NA, NA)
 print(aperio.labels)
-#Now add the three labels for each stain
-for( i in 1:length(stain.names)) {
+#Now add the three labels for each sid
+for( i in 1:length(sid.names)) {
   aperio.labels <- cbind(aperio.labels, "(3+, 2+, 1+)", "(3+, 2+)", "(3+)")
   print(aperio.labels)
 }
