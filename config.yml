@@ -1,7 +1,7 @@
 #Config file for consolidator.R To change the column names in the Excel file
 #Change the names here
 - "Group"
-- "Stain"
+- "SID"
 - "Mouse ID"
 - "Slide Number"
 - "Region"
