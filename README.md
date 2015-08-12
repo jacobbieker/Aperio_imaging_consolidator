@@ -9,21 +9,7 @@
  Assumptions:
    1.  script is located in same directory as input files
    3.  input .xls files follow this naming convention:
-
-             mouse_NN_slide_MM_stain_NAME.xls
-
-       so for mouse 3, slide 2, stain BRDU, the file name should be:
-
-             mouse_3_slide_2_stain_BRDU.xls
-
-       Note that the delimitator between each component of the file name can be 
-       any of the following: "_"
-       
-       Other valid names include:
-       
-              _3__2__BRDU.xls
-              
-      If the file name does not include the stain, the script will print out a warning and the relevant file name.
+       <Initials-Of-Researcher>4.X M(Mouse Numer) (Mouse SID) (Stain).xls
 
 #   HOW TO USE
 There are a few ways to use this script. 
@@ -57,6 +43,8 @@ above format
 6. Double click on aperio_consolidator.sh to run the program
 7. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
 
+# Troubleshooting
+On Mac OSX, sometimes R will give errors if the .sh file is run. One way around that is to open the included AppleScript template, and put in the paths to the correct files and directory, and run the program from the AppleScript script. 
 
 # Testing
 
@@ -70,6 +58,3 @@ Currently has to be to manually checked against expected files (stored in expect
 Cases currently covered: 
 - Large sets (>4000) of files
 - Missing stain name -> Throws error with the file name
-
-Cases needed to be covered:
-- Naming convention errors besides just missing last section
