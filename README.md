@@ -9,7 +9,7 @@
  Assumptions:
    1.  script is located in same directory as input files
    3.  input .xls files follow this naming convention:
-       <Initials-Of-Researcher>4.X M(Mouse Numer) (Mouse SID) (Stain).xls
+       (Initials-Of-Researcher)4.X M(Mouse Numer) (Mouse SID) (Stain).xls
 
 #   HOW TO USE
 There are a few ways to use this script. 
