@@ -10,6 +10,7 @@
    1.  script is located in same directory as input files
    3.  input .xls files follow this naming convention:
        (Initials-Of-Researcher)4.X M(Mouse Numer) (Mouse SID) (Stain).xls
+       E.g. "JB6.3 M3 22341 BrdU.xls""
 
 #   HOW TO USE
 There are a few ways to use this script. 
@@ -44,7 +45,9 @@ above format
 7. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
 
 # Troubleshooting
-On Mac OSX, sometimes R will give errors if the .sh file is run. One way around that is to open the included AppleScript template, and put in the paths to the correct files and directory, and run the program from the AppleScript script. 
+On Mac OSX, sometimes R will give errors if the .sh file is run. One way around that is to open the included AppleScript template, and put in the paths to the correct files and directory, and run the program from the AppleScript script. Recommended way would be to save it as a .app file, so it can be double clicked to be executed.
+
+Perl not found: on Mac OSX and Linux, if the perl executable is not found, from the terminal run <code>which -a perl</code> to list different executables, choose one, and put that location in the R script.
 
 # Testing
 
