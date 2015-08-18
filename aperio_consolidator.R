@@ -66,7 +66,7 @@ get.mouse.id <- function(file.name) {
   file.name <- strsplit(file.name, "\\.")[[1]][2];
   #   extract mouse number
   mouse.id.full <- strsplit(file.name, " ")[[1]][2];
-  mouse.id <- strsplit(mouse.id.full, "")[[1]][2];
+  mouse.id <- strsplit(mouse.id.full, "M")[[1]][2];
   print(mouse.id)
   return(mouse.id);
 }   #   get.mouse.id()
@@ -132,7 +132,7 @@ mouse.ids <- c();
 master.workbook <- loadWorkbook("master.xlsx")
 master.content <- readWorksheet(master.workbook, sheet = 1)
 # Get vector of genotypes in numerical order to apply later
-master.genotype <- master.content$Genotype
+master.genotype <- master.content$Group
 
 
 #-------------------------------------------------------------------------
@@ -153,14 +153,14 @@ for(i in 1:length(files))   {
   #   extract column headings, for output (and possibly QC), for the first file only
   if(i == 1)
     column.headings <- colnames(file.content);
-  
+  print(file.name)
   #   extract relevant metadata from file name
   mouse.idnum <- get.mouse.id(file.name);
   slide.number <- get.slide.num(file.name);
   sid.number <- get.sid.name(file.name);
   #Convert to numeric right after getting number
   mouse.idnum <- as.numeric(mouse.idnum)
-  slide.number <- as.numeric(slide.number)
+  slide.number <- slide.number
   mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
   #Adds sid number to sid.names if it does not already exist in the vector
   if(!sid.number %in% sid.names) {
@@ -406,11 +406,9 @@ writeWorksheet(workbook, dummy.data, sheet = "summary", startRow = 4)
 
 #Empty places for the first two spots, for Groups and Mouse ID
 aperio.labels <- c(NA, NA)
-print(aperio.labels)
 #Now add the three labels for each sid
 for( i in 1:length(sid.names)) {
   aperio.labels <- cbind(aperio.labels, "(3+, 2+, 1+)", "(3+, 2+)", "(3+)")
-  print(aperio.labels)
 }
 #Convert to data.frame to XLConnect can write it 
 aperio.labels <- as.data.frame(aperio.labels, stringsAsFactors=FALSE)
