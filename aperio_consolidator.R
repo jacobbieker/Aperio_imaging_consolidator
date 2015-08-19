@@ -7,21 +7,11 @@
 #   Output is a single .xlsx worksheet
 #
 # Assumptions:
-#   1.  Perl is installed on the system
-#   2.  script is located in same directory as input files
-#   3.  directory containing input files contains only this script, the master.xlsx file
-#       plus .xls files to be consolidated
-#   4.  Master file has the groups of the mice in numerical order
-#   5.  input .xls files follow this naming convention:
-#
-#             mouse_NN_slide_MM_sid_MM.xls
-#
-#       so for mouse 3, slide 2, sid 5, the file name should be:
-#
-#             mouse_3_slide_2_sid_5.xls
-#
-#       Note that the delimitator between each component of the file name can be 
-#       any of the following: "_"
+#  1.  script is located in same directory as input files
+#  2.   Perl is installed in the system
+#  3.  input .xls files follow this naming convention:
+#   (Initials-Of-Researcher)4.X M(Mouse Numer) (Mouse SID) (Stain).xls
+#   E.g. "JB6.3 M3 22341 BrdU.xls""
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -75,7 +65,7 @@ get.slide.num <- function(file.name)   {
   #   remove file extension
   file.name <- strsplit(file.name, "\\.")[[1]][2];
   #   extract mouse number
-  slide.num <- strsplit(file.name, " ")[[1]][3];
+  slide.num <- strsplit(file.name, " ")[[1]][4];
   print(slide.num)
   return(slide.num);    
 }   #   get.slide.num()
@@ -84,14 +74,8 @@ get.sid.name <- function(file.name)   {
   #   remove file extension
   file.name <- strsplit(file.name, "\\.")[[1]][2];
   #   extract sid number
-  sid.name <- strsplit(file.name, " ")[[1]][4];
+  sid.name <- strsplit(file.name, " ")[[1]][3];
   print(sid.name)
-  #Checks if sid name does not exist, because the output will be messed up if so
-  if (is.na(sid.name)) {
-    noStainError <- paste0("Warning: File ", file.name, " does not conform to the naming convention
-                           , please rename file and rerun script")
-    stop(noStainError)
-  }
   return(sid.name);
 }   #   get.sid.name()
 #-------------------------------------------------------------------------
@@ -160,13 +144,12 @@ for(i in 1:length(files))   {
   sid.number <- get.sid.name(file.name);
   #Convert to numeric right after getting number
   mouse.idnum <- as.numeric(mouse.idnum)
-  slide.number <- slide.number
   mouse.group <-  master.genotype[as.numeric(mouse.idnum)]
   #Adds sid number to sid.names if it does not already exist in the vector
-  if(!sid.number %in% sid.names) {
-    sid.names <- c(sid.names, sid.number);
+  if(!slide.number %in% sid.names) {
+    sid.names <- c(sid.names, slide.number);
     #  Create a sheet in the master workbook for each sid
-    createSheet(workbook, name = sid.number);
+    createSheet(workbook, name = slide.number);
   }
   
   #Adds sid number to sid.names if it does not already exist in the vector
@@ -175,7 +158,7 @@ for(i in 1:length(files))   {
   }
   
   #   prepend metadata to file content
-  file.content <- cbind(mouse.group, sid.number,mouse.idnum, slide.number, file.content);
+  file.content <- cbind(mouse.group, sid.number,slide.number, mouse.idnum, file.content);
   
   #   append file content to output data.frame
   output <- rbind(output, file.content);
@@ -198,6 +181,7 @@ colnames(output) <- predefined.column.headers;
 factor_to_numbers <- output
 factor_to_numbers$'SID' <- NULL
 factor_to_numbers$'Group' <- NULL
+factor_to_numbers$'Stain' <- NULL
 
 #   convert factors to numbers
 #       Not elegant, but needed so that the first three columns are converted
@@ -212,10 +196,11 @@ factor_to_numbers <- data.frame(factor_to_numbers)
 #Reassign sid back to the temp data.frame
 factor_to_numbers$'SID' <- output$'SID'
 factor_to_numbers$'Group' <- output$'Group'
+factor_to_numbers$'Stain' <- output$'Stain'
 #Output is then given the modified data.frame for use in the rest of the script
 output <- factor_to_numbers
 #Reorder so that Stain and Group are the first two columns, like it was originally
-output <- output[c(length(output), length(output) - 1, seq(1, length(output) - 2, by = 1))]
+output <- output[c(length(output) - 1, length(output) - 2, length(output),  seq(1, length(output) - 3, by = 1))]
 
 #Reassign column names lost in above step
 colnames(output) <- predefined.column.headers;
@@ -232,9 +217,9 @@ currentSheets <- getSheets(workbook);
 
 for(i in 1:length(currentSheets)) {
   # Selects the subset of the output that has the same sid number
-  output.subset <- output[output[,2]==sid.names[i],]
+  output.subset <- output[output[,3]==sid.names[i],]
   #Drops the Stain number from the data.frame before writing it
-  output.subset[,2] <- NULL
+  output.subset[,3] <- NULL
   #Get rid of sid number on columns, since that is stored in sheet name
   writeWorksheet(workbook, output.subset, sheet = currentSheets[i], 1, 1, header = TRUE)
 }
@@ -267,7 +252,7 @@ for(i in 1:length(mouse.ids)) {
   current.summary <- c(current.summary, mouse.ids[i])
   for(j in 1:length(sid.names)) {
     #subset output for current mouse and sid numbers
-    mouse.data.current <- subset(output, output[,3]==mouse.ids[i] & output[,2]==sid.names[j])
+    mouse.data.current <- subset(output, output[,4]==mouse.ids[i] & output[,3]==sid.names[j])
     #Perform the calculations
     #   Averaging to get the number of cells per mm per sid and mouse
     average.size <- mean(mouse.data.current[,26]);
@@ -363,7 +348,7 @@ writeWorksheet(workbook, mouse.summary.output, sheet = "summary", startRow = 6, 
 group.names <- c();
 mice.ids <- mouse.summary.output$`Mouse ID`
 for(i in 1:length(mice.ids)) {
-  current.data <- subset(output, output[,3]==mice.ids[i])
+  current.data <- subset(output, output[,4]==mice.ids[i])
   current.data.row <- head(current.data, 1)
   # Taken from: https://stackoverflow.com/questions/24447877/invalid-factor-level-na-generated-when-pasting-in-a-dataframe-in-r
   current.data.row[,c(1)] <- sapply(current.data.row[,c(1)],as.character) 
