@@ -100,14 +100,12 @@ masterwkbk <- loadWorkbook("master.xlsx", create = FALSE)
 
 #   create list to hold output data.frames
 output <- list();
-#   create vector for storing the different stain names so that diff sheets created
+#   create vector for storing the different slid numbers so that diff sheets created
 slide.names <- c();
 #   create workbook to save the data to
 workbook <- loadWorkbook("consolidated_files.xlsx", create = TRUE);
 #   create vector to store the different mice id for use in the summary
 mouse.ids <- c();
-#  SID vector to store SID for the summary page
-sid.names <- c();
 
 #-------------------------------------------------------------------------
 #-------------------------------------------------------------------------
@@ -154,13 +152,9 @@ for(i in 1:length(files))   {
     createSheet(workbook, name = slide.number);
   }
   
-  #Adds mouse number to mouse.ids if it does not already exist in the vector
+  #Adds sid number to slide.names if it does not already exist in the vector
   if(!mouse.idnum %in% mouse.ids) {
     mouse.ids <- c(mouse.ids, mouse.idnum);
-  }
-  #Adds sid number to sid.names if it does not already exist in the vector
-  if(!sid.number %in% sid.names) {
-    sid.names <- c(sid.number, sid.names);
   }
   
   #   prepend metadata to file content
