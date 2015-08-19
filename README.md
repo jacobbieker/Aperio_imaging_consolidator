@@ -8,7 +8,9 @@
    Output is a single .xlsx worksheet
  Assumptions:
    1.  script is located in same directory as input files
-   3.  input .xls files follow this naming convention:
+   2.  Perl is installed on the system.
+   3.  There is one "master.xlsx" file in the directory
+   4.  input .xls files follow this naming convention:
        (Initials-Of-Researcher)4.X M(Mouse Numer) (Mouse SID) (Stain).xls
        E.g. "JB6.3 M3 22341 BrdU.xls""
 
@@ -43,6 +45,11 @@ above format
 5. If necessary, change the names of the columns in config.yml by opening it up in a text editor
 6. Double click on aperio_consolidator.sh to run the program
 7. A file called "consolidated_files.xlsx" should be created in the same folder, it contains the output of this script
+
+# Combining multiple different experiments
+To combine multiple different experiements, the master.xlsx file to contain the Group, SID, and Mouse ID used for each mouse in the experiment. Then follow the directions as above.
+
+Once caveat is that if there are different mice with the same ID in the two experiments, on the summary sheet, one of the mice's data will be overwritten by the other one. As a work around, either change the mice's ID, or append some nonsense numbers to the ID so it will be on a different line.
 
 # Troubleshooting
 On Mac OSX, sometimes R will give errors if the .sh file is run. One way around that is to open the included AppleScript template, and put in the paths to the correct files and directory, and run the program from the AppleScript script. Recommended way would be to save it as a .app file, so it can be double clicked to be executed.
