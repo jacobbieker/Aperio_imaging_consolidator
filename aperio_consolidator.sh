@@ -42,7 +42,7 @@ if(require("XLConnect") & require("yaml") & require("gdata")){
 }
  
 #Set the Perl location so that gdata can read it
-perl <- "C:/strawberry/perl/bin/perl.exe"
+perl <- "usr/bin/perl"
 
 #loads column names from config file config.yml
 predefined.column.headers <- yaml.load_file("config.yml");
