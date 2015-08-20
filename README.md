@@ -12,7 +12,7 @@
    3.  There is one "master.xlsx" file in the directory
    4.  input .xls files follow this naming convention:
        (Initials-Of-Researcher)4.X M(Mouse Numer) (Mouse SID) (Stain).xls
-       E.g. "JB6.3 M3 22341 BrdU.xls""
+       E.g. "JB6.3 M3 F22341 BrdU.xls""
 
 #   HOW TO USE
 There are a few ways to use this script. 
@@ -58,13 +58,4 @@ Perl not found: on Mac OSX and Linux, if the perl executable is not found, from 
 
 # Testing
 
-To test this program, open the testing subfolder. If necessary, edit the testConfig.yml file to change the testing
-parameters. 
-
-Run test.py to create dummy test files based off any input file. 
-
-Currently has to be to manually checked against expected files (stored in expected)
-
-Cases currently covered: 
-- Large sets (>4000) of files
-- Missing stain name -> Throws error with the file name
+To test these scripts, go to the testing folder and copy all the files in any of the subfolders to the same directory as the R script. Run the script.
